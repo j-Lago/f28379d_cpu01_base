@@ -1,0 +1,86 @@
+/*
+ * cla_tasks.cla
+ *
+ *  Created on: 7 de jan de 2022
+ *      Author: j-Lago
+ */
+
+#include "F2837xD_Cla_defines.h"
+#include <stdint.h>
+#include "./include/CLAMath.h"
+#include "cla.h"
+#include "cla_tasks.h"
+
+
+
+/*
+ * Task1: inverse park transform: dq -> abc
+ */
+__interrupt void Cla1Task1 ( void )
+{
+    // modulator angular velocity
+    cla_w = cla_f * PI2;
+    if(cla_dir < 0)
+        cla_w = -cla_w;
+
+    // modulator angle
+    cla_th +=  cla_w * DT;
+
+    // wrap angle to the interval [-pi, pi]
+    if(cla_th > PI)
+        cla_th -= PI2;
+    else if(cla_th < -PI)
+        cla_th += PI2;
+
+    // inverse park transform
+    float cos = CLAcos(cla_th);
+    float sin = CLAsin(cla_th);
+    float cos_2 = 0.5f * cos;
+    float sin_2 = 0.5f * sin;
+    float cossqrt3_2 = 0.86602540378443864676372317075294f * cos;
+    float sinsqrt3_2 = 0.86602540378443864676372317075294f * sin;
+
+    cla_abc[0] = cos*cla_dq[0]                + sin*cla_dq[1];
+    cla_abc[1] = (-cos_2+sinsqrt3_2)*cla_dq[0] - (sin_2 + cossqrt3_2)*cla_dq[1];
+    cla_abc[2] = (-cos_2-sinsqrt3_2)*cla_dq[0] + (-sin_2 + cossqrt3_2)*cla_dq[1];
+
+}
+
+__interrupt void Cla1Task2 ( void )
+{
+
+}
+
+__interrupt void Cla1Task3 ( void )
+{
+
+}
+
+__interrupt void Cla1Task4 ( void )
+{
+
+}
+
+__interrupt void Cla1Task5 ( void )
+{
+
+}
+
+__interrupt void Cla1Task6 ( void )
+{
+
+}
+
+interrupt void Cla1Task7 ( void )
+{
+
+}
+
+interrupt void Cla1Task8 ( void )
+{
+
+}
+
+//
+// End of file
+//
