@@ -21,7 +21,7 @@ void main(void)
 {
     hardware_setup();
 
-    load_defaults(); // inicializaÁ„o de vari·veis do cla (TODO: linkar inicializaÁ„o com valores padr„o da tabela parameters_default.h)
+    load_defaults(); // inicializa√ß√£o de vari√°veis do cla (TODO: linkar inicializa√ß√£o com valores padr√£o da tabela parameters_default.h)
 
     while(true)
     {
