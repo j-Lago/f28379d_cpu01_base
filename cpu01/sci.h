@@ -31,11 +31,11 @@ interrupt void sciaTxFifoIsr(void);
  *
  *    A classe foi desenvolvida para funcionar da seguinte forma:
  *
- *      - deve ser instanciada globalmente;
+ *      - a classe é um singleton, e a instancia deve ser obtida por getInstance;
  *
- *      - o método setup() deve ser chamado na inicialização do programa;
+ *      - o método setup() deve ser chamado na inicialização do programa (static method);
  *
- *      - o método start() deve ser chamado antes de entrar no loop infinito para habilitar as interrupções;
+ *      - o método start() deve ser chamado antes de entrar no loop infinito para habilitar as interrupções (static method);
  *
  *      - a constante BAUD_RATE define o baud rate em bps :
  *        (ScicRegs.SCIHBAUD e ScicRegs.SCILBAUD) -> baud_count = CPU_CLOCK / 8 / 8 / BAUD_RATE - 1
@@ -63,12 +63,20 @@ public:
 
     FIFO<char, FIFO_TX_SIZE> fifo_tx;
 
-    SCI();
     static void setup(void);
     static void start(void);
+
     void push(const fixed_string<16>& s16);
     void push(const fixed_string<32>& s32);
     void push(const char* str);
     void dump(void);
+
+//singleton
+private:
+    static SCI instance;
+    SCI();
+public:
+    static SCI& getInstance();
+    SCI(const SCI&) = delete;  // impede construtor de cópia
 };
 

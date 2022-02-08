@@ -16,6 +16,10 @@
 // Interrupção de final de conversão do ADC
 interrupt void adca1_isr(void)
 {
+    static ADC& adc = ADC::getInstance();
+    static PWM& pwm = PWM::getInstance();
+    static uint32_t refresh_count = REFRESH_COMP;
+
     logic2.set();
 
     // logica para ligar, desligar e clear pelo debuger
@@ -93,29 +97,6 @@ interrupt void adcb_ppb_isr(void)
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
 
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP10;
-}
-
-
-
-
-
-
-
-ADC::ADC()
-{
-    iu = 0.f;
-    iv = 0.f;
-    vp0 = 0.f;
-    v0n = 0.f;
-    vrs = 0.f;
-    vts = 0.f;
-    ic = 0.f;
-    ib = 0.f;
-    vrsf = 0.f;
-    vtsf = 0.f;
-    icf = 0.f;
-    ibf = 0.f;
-    pot = 0.f;
 }
 
 void ADC::read()
@@ -484,6 +465,27 @@ void ADC::CalAdcINL(Uint16 adc)
             }
             break;
     }
+}
+
+
+//singleton
+ADC ADC::instance;
+ADC& ADC::getInstance(){ return instance; }
+ADC::ADC()
+{
+    iu = 0.f;
+    iv = 0.f;
+    vp0 = 0.f;
+    v0n = 0.f;
+    vrs = 0.f;
+    vts = 0.f;
+    ic = 0.f;
+    ib = 0.f;
+    vrsf = 0.f;
+    vtsf = 0.f;
+    icf = 0.f;
+    ibf = 0.f;
+    pot = 0.f;
 }
 
 

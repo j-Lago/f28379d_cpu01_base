@@ -12,36 +12,15 @@
 #include "adc.h"
 #include "cla.h"
 
+void load_defaults();
+void hardware_setup();
+
 void main(void)
 {
-    InitSysCtrl();
-    InitGpio();
-    InitPieCtrl();
+    hardware_setup();
 
-    IER = 0x0000;
-    IFR = 0x0000;
-
-    InitPieVectTable();
-
-    CLA_setup();
-    OutPin::setup();
-    VSI3fPWM::setup();
-    ADC::setup();
-    SCI::setup();
-
-    CLA_start();
-    VSI3fPWM::start();
-    ADC::start();
-    SCI::start();
-    EnableInterrupts();
-
-    // inicialização de variáveis do cla (TODO: linkar inicialização com valores padrão da tabela parameters_default.h)
-    cla_dq[0] = 1.0f;
-    cla_dq[1] = 0.0f;
-    cla_dir = 1.0f;
-    cla_th = 0.0f;
-
-    pwm.enable();
+    load_defaults(); // inicialização de variáveis do cla (TODO: linkar inicialização com valores padrão da tabela parameters_default.h)
+    PWM::getInstance().enable(); // habilita pulsos (apenas para testes iniciais)
 
     while(true)
     {
@@ -49,3 +28,35 @@ void main(void)
     }
 }
 
+
+void hardware_setup()
+{
+    InitSysCtrl();
+    InitGpio();
+    InitPieCtrl();
+
+    IER = 0x0000;
+    IFR = 0x0000;
+    InitPieVectTable();
+
+    CLA_setup();
+    OutPin::setup();
+    PWM::setup();
+    ADC::setup();
+    SCI::setup();
+
+    CLA_start();
+    PWM::start();
+    ADC::start();
+    SCI::start();
+    EnableInterrupts();
+}
+
+
+void load_defaults()
+{
+    cla_dq[0] = 1.0f;
+    cla_dq[1] = 0.0f;
+    cla_dir = 1.0f;
+    cla_th = 0.0f;
+}

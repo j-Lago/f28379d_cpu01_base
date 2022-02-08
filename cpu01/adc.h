@@ -44,8 +44,6 @@ struct ADC
     float ibf;
     float pot;
 
-
-    ADC();
     void read(void);
     static void setup(void);
     static void start(void);
@@ -53,6 +51,14 @@ struct ADC
 private:
     static void AdcSetMode(uint16_t adc, uint16_t resolution, uint16_t signalmode);
     static void CalAdcINL(uint16_t adc);
+
+//singleton
+private:
+    static ADC instance;
+    ADC();
+public:
+    static ADC& getInstance();
+    ADC(const ADC&) = delete;  // impede construtor de cópia
 
 };
 

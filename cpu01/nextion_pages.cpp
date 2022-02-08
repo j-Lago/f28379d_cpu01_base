@@ -11,11 +11,11 @@
 //using namespace Nextion;
 
 Parameter NextionP0::par[PAR_SIZE] = PAR_INIT;
+PWM& NextionP0::modulator = PWM::getInstance();
 
 
 // Nextion page 0
-NextionP0::NextionP0(VSI3fPWM* modulator)
-    : modulator(modulator)
+NextionP0::NextionP0()
 {
     mode = hmi_init;
     last_err = no_err;
@@ -68,7 +68,7 @@ void NextionP0::dec_cursor()
 
 void NextionP0::toggle_state()
 {
-    modulator->en = !modulator->en;
+    modulator.en = !modulator.en;
     load_refresh();
 }
 
@@ -292,7 +292,7 @@ void NextionP0::refresh(void)
         }
 
 
-        num_state.val(modulator->en);    // ayaliza status
+        num_state.val(modulator.en);    // ayaliza status
         btn_reverse.state(cla_dir);   // botão direção
 
         // msg erro
@@ -341,7 +341,7 @@ void NextionP0::refresh(void)
         if(mode != hmi_edit & mode != hmi_err)
             mode = hmi_waiting;
 
-        port->dump();
+        port.dump();
         pending_refresh = false;
 
     }

@@ -36,7 +36,7 @@
  *        cíclicas nas 3 fases, com efeito para o próximo ciclo da portadora.
  *
  */
-class VSI3fPWM
+class PWM
 {
 private:
     static const uint16_t CMP_TEMPO_MORTO = 38; // CMP_TEMPO_MORTO*40ns: 38 -> 1.52us
@@ -52,7 +52,6 @@ public:
     float b;  // range: -1...+1
     float c;  // range: -1...+1
 
-    VSI3fPWM();
     static void setup(void);
     static void start(void);
     bool enable(void);
@@ -62,5 +61,13 @@ public:
     void update();
     void setComps(float a, float b, float c);
     void setComps(float* abc);
+
+//singleton
+private:
+    static PWM instance;
+    PWM();
+public:
+    static PWM& getInstance();
+    PWM(const PWM&) = delete;  // impede construtor de cópia
 };
 

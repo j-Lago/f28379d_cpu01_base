@@ -20,13 +20,13 @@ using namespace Nextion;
 //--------------------------------------------------------------------------
 
 const char *Comm::EOM = "ÿÿÿ";
-SCI* Comm::port = &sci;
+SCI& Comm::port = SCI::getInstance();
 
-void Comm::send(const fixed_string<16>& s16)    { port->push(s16);          }
-void Comm::send(const char* str)                { port->push(str);          }
-void Comm::sendEOM(fixed_string<16>& s16)       { port->push(s16 << EOM);   }
-void Comm::send(const fixed_string<32>& s32)    { port->push(s32);          }
-void Comm::sendEOM(fixed_string<32>& s32)       { port->push(s32 << EOM);   }
+void Comm::send(const fixed_string<16>& s16)    { port.push(s16);          }
+void Comm::send(const char* str)                { port.push(str);          }
+void Comm::sendEOM(fixed_string<16>& s16)       { port.push(s16 << EOM);   }
+void Comm::send(const fixed_string<32>& s32)    { port.push(s32);          }
+void Comm::sendEOM(fixed_string<32>& s32)       { port.push(s32 << EOM);   }
 
 //--------------------------------------------------------------------------
 
