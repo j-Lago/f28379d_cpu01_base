@@ -12,7 +12,24 @@
 #include "adc.h"
 #include "cla.h"
 
+void load_defaults();
+void hardware_setup();
+
 void main(void)
+{
+    hardware_setup();
+
+    load_defaults(); // inicialização de variáveis do cla (TODO: linkar inicialização com valores padrão da tabela parameters_default.h)
+    PWM::getInstance().enable(); // habilita pulsos (apenas para testes iniciais)
+
+    while(true)
+    {
+        page0.refresh();
+    }
+}
+
+
+void hardware_setup()
 {
     InitSysCtrl();
     InitGpio();
@@ -20,7 +37,6 @@ void main(void)
 
     IER = 0x0000;
     IFR = 0x0000;
-
     InitPieVectTable();
 
     CLA_setup();
@@ -34,18 +50,13 @@ void main(void)
     ADC::start();
     SCI::start();
     EnableInterrupts();
+}
 
-    // inicialização de variáveis do cla (TODO: linkar inicialização com valores padrão da tabela parameters_default.h)
+
+void load_defaults()
+{
     cla_dq[0] = 1.0f;
     cla_dq[1] = 0.0f;
     cla_dir = 1.0f;
     cla_th = 0.0f;
-
-    PWM::getInstance().enable(); // habilita pulsos (apenas para testes iniciais)
-
-    while(true)
-    {
-        page0.refresh();
-    }
 }
-
