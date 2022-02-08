@@ -25,12 +25,12 @@ void main(void)
 
     CLA_setup();
     OutPin::setup();
-    VSI3fPWM::setup();
+    PWM::setup();
     ADC::setup();
     SCI::setup();
 
     CLA_start();
-    VSI3fPWM::start();
+    PWM::start();
     ADC::start();
     SCI::start();
     EnableInterrupts();
@@ -41,7 +41,7 @@ void main(void)
     cla_dir = 1.0f;
     cla_th = 0.0f;
 
-    pwm.enable();
+    PWM::getInstance().enable(); // habilita pulsos (apenas para testes iniciais)
 
     while(true)
     {

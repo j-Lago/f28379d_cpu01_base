@@ -26,7 +26,7 @@ public:
     Picture2 btn_reverse    = {"p2", 59, 60, true};
     Slider sld_slider       = {"h1"};
 
-    VSI3fPWM* modulator;
+    static PWM& modulator;
     hmi_mode mode;
     focus_error last_err;
 
@@ -39,7 +39,7 @@ public:
     int16_t par_sel;
     static Parameter par[];
 
-    NextionP0(VSI3fPWM* modulator);
+    NextionP0();
     void inc_sel();
     void dec_sel();
     void inc_cursor();

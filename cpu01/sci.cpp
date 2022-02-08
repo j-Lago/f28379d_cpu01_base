@@ -12,8 +12,6 @@
 #include "globals.h"
 
 
-SCI::SCI(){}
-
 void SCI::setup(void)
 {
     EALLOW;
@@ -142,9 +140,6 @@ interrupt void sciaRxFifoIsr(void)
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP8;
 }
 
-
-
-
 interrupt void sciaTxFifoIsr(void)
 {
 
@@ -152,4 +147,12 @@ interrupt void sciaTxFifoIsr(void)
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP8;
 
 }
+
+
+
+
+//singleton
+SCI SCI::instance;
+SCI::SCI(){}
+SCI& SCI::getInstance(){ return instance; }
 

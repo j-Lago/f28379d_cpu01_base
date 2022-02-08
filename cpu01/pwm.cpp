@@ -8,15 +8,8 @@
 #include "F28x_Project.h"
 #include "pwm.h"
 
-VSI3fPWM::VSI3fPWM()
-{
-    clear();
-    a = 0;
-    b = 0;
-    c = 0;
-}
 
-void VSI3fPWM::setComps(float a, float b, float c)
+void PWM::setComps(float a, float b, float c)
 {
     this->a = a;
     this->b = b;
@@ -24,7 +17,7 @@ void VSI3fPWM::setComps(float a, float b, float c)
     update();
 }
 
-void VSI3fPWM::setComps(float* abc)
+void PWM::setComps(float* abc)
 {
     this->a = abc[0];
     this->b = abc[1];
@@ -32,7 +25,7 @@ void VSI3fPWM::setComps(float* abc)
     update();
 }
 
-void VSI3fPWM::update()
+void PWM::update()
 {
     if(fault)
         trip();
@@ -42,7 +35,7 @@ void VSI3fPWM::update()
     EPwm3Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * c + BIAS);
 }
 
-bool VSI3fPWM::enable(void)
+bool PWM::enable(void)
 {
     if(!fault)
     {
@@ -63,7 +56,7 @@ bool VSI3fPWM::enable(void)
 }
 
 
-void VSI3fPWM::disable(void)
+void PWM::disable(void)
 {
     EALLOW;
     EPwm1Regs.TZFRC.bit.OST = 1;
@@ -76,19 +69,19 @@ void VSI3fPWM::disable(void)
     en = false;
 }
 
-void VSI3fPWM::trip()
+void PWM::trip()
 {
     disable();
     fault = true;
 }
 
-void VSI3fPWM::clear()
+void PWM::clear()
 {
     disable();
     fault = false;
 }
 
-void VSI3fPWM::setup(void)
+void PWM::setup(void)
 {
     EALLOW;
     GpioCtrlRegs.GPAPUD.bit.GPIO0 = 1;    // Disable pull-up on GPIO0 (EPWM1A)
@@ -254,9 +247,21 @@ void VSI3fPWM::setup(void)
 
 }
 
-void VSI3fPWM::start(void)
+void PWM::start(void)
 {
     EALLOW;
     CpuSysRegs.PCLKCR0.bit.TBCLKSYNC = 1;
     EDIS;
+}
+
+
+//singleton
+PWM PWM::instance;
+PWM& PWM::getInstance(){ return instance; }
+PWM::PWM()
+{
+    clear();
+    a = 0;
+    b = 0;
+    c = 0;
 }

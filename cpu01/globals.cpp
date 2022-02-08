@@ -18,11 +18,6 @@ OutPin logic1(19, active_high);
 OutPin logic2(18, active_high);
 OutPin logic3(67, active_high);
 
-volatile uint32_t refresh_count = REFRESH_COMP;
+NextionP0 page0;
 
-ADC adc;
-VSI3fPWM pwm;
-SCI sci;
-NextionP0 page0(&pwm);
 
-volatile bool escreve = false;

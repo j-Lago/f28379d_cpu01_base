@@ -39,7 +39,7 @@ namespace Nextion
     {
     public:
         static const char* EOM; // End of Message: nextion messages ends with three 0xff characters
-        static SCI* port;   // pointer to SCI (UART) object
+        static SCI& port;   // pointer to SCI (UART) object
 
     public:
         void sendEOM(fixed_string<16>& s16); // add END to the message and sends it through sci
