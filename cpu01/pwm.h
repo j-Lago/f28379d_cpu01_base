@@ -12,7 +12,7 @@
  *
  *    A classe foi desenvolvida para funcionar da seguinte forma:
  *
- *      - a classe é um singleton, e a instância deve ser obtida por getInstance;
+ *      - deve ser instanciada globalmente;
  *
  *      - o método setup() deve ser chamado na inicialização do programa;
  *

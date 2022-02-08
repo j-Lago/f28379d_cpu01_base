@@ -15,13 +15,16 @@
 void load_defaults();
 void hardware_setup();
 
-
-
 void main(void)
 {
     hardware_setup();
 
+<<<<<<< HEAD
     load_defaults(); // inicializaÃ§Ã£o de variÃ¡veis do cla (TODO: linkar inicializaÃ§Ã£o com valores padrÃ£o da tabela parameters_default.h)
+=======
+    load_defaults(); // inicialização de variáveis do cla (TODO: linkar inicialização com valores padrão da tabela parameters_default.h)
+    PWM::getInstance().enable(); // habilita pulsos (apenas para testes iniciais)
+>>>>>>> parent of 9bebb1c (p)
 
     while(true)
     {
