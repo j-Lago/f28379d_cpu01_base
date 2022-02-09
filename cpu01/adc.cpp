@@ -16,8 +16,6 @@
 // Interrupção de final de conversão do ADC
 interrupt void adca1_isr(void)
 {
-    static ADC& adc = ADC::getInstance();
-    static PWM& pwm = PWM::getInstance();
     static uint32_t refresh_count = REFRESH_COMP;
 
     logic2.set();
@@ -52,17 +50,6 @@ interrupt void adca1_isr(void)
     pwm.setComps(cla_abc);
 
     if(refresh_count++ >= REFRESH_COMP){
-        // exemplo de parãmetros read_write
-        cla_dq[0] = page0.par[1].value;
-        cla_dq[1] = page0.par[2].value;
-        cla_f     = page0.par[0].value;
-
-        //exemplo de parâmetro read_only
-        page0.par[3].value = cla_w;
-        page0.par[4].value = cla_dir;
-        page0.par[5].value = cla_th;
-        page0.par[6].value = adc.pot * 100;
-
         led_az.toggle();
         refresh_count = 0;
         page0.periodic_refresh();
@@ -80,6 +67,9 @@ interrupt void adca1_isr(void)
 //
 interrupt void adca_ppb_isr(void)
 {
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
@@ -92,6 +82,9 @@ interrupt void adca_ppb_isr(void)
 //
 interrupt void adcb_ppb_isr(void)
 {
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
@@ -116,7 +109,9 @@ void ADC::read()
     icf =  (AdcaResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ic2  -> pino 63
     ibf =  (AdcbResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ib2  -> pino 65
 
-    pot = AdcaResultRegs.ADCRESULT6 * (float)km_DC; // DAC_A(JA3) -> pino 30
+    pot = AdcaResultRegs.ADCRESULT6 * (float)km_DC * 100.0f; // DAC_A(JA3) -> pino 30
+
+    vdc = vp0+v0n;
 }
 
 void ADC::setup()
@@ -128,8 +123,8 @@ void ADC::setup()
     EALLOW;
 
     PieVectTable.ADCA1_INT = &adca1_isr; // mapeia a função a ser chamada pela interrupção do ADCA
-    PieVectTable.ADCA_EVT_INT = &adca_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCa)
-    PieVectTable.ADCB_EVT_INT = &adcb_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCb)
+    PieVectTable.ADCA_EVT_INT = &adca_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCa - iu)
+    PieVectTable.ADCB_EVT_INT = &adcb_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCb - iv)
 
     AdcaRegs.ADCCTL2.bit.PRESCALE = 6; //set ADCCLK divider to /4
     AdcSetMode(ADC_ADCA, adc_res, adc_mode);
@@ -268,13 +263,6 @@ void ADC::setup()
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1; // limpa flag high limit
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1; // limpa flag low limit
 
-    AdcbRegs.ADCPPB1CONFIG.bit.CONFIG = 0;  //PPB1 is associated with soc0
-    AdcbRegs.ADCPPB1TRIPHI.bit.LIMITHI = LIMITHI_OVERCURRENT;  //set high limits
-    AdcbRegs.ADCPPB1TRIPLO.bit.LIMITLO = LIMITLO_OVERCURRENT;    //set low limits
-    AdcbRegs.ADCEVTINTSEL.bit.PPB1TRIPHI = 1;  //enable high limit events to generate interrupt
-    AdcbRegs.ADCEVTINTSEL.bit.PPB1TRIPLO = 1;  //enable low limit events to generate interrupt
-    AdcbRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1; // limpa flag high limit
-    AdcbRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1; // limpa flag low limit
 
     // configura disparo SOC
     EALLOW;

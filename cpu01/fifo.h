@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "F28x_Project.h"
+
 template<typename T, uint16_t size>
 class FIFO
 {

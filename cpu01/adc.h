@@ -22,10 +22,10 @@ struct ADC
     static const float FUNDOESCALA_I = 20.0f;
     static const float FUNDOESCALA_VAC = 400.0f;
     static const float FUNDOESCALA_VDC = 20.0f;
-    static const int LIMITHI_OVERCURRENT =  (int) ((1 + OVERCURRENT/FUNDOESCALA_I)*2047.5);
-    static const int LIMITLO_OVERCURRENT =  (int) ((1 - OVERCURRENT/FUNDOESCALA_I)*2047.5);
-    static const double km_DC = 0.00024420024420024420024;
-    static const double km_AC = 0.00048840048840048840048;
+    static const int LIMITHI_OVERCURRENT =  (int) ((1 + OVERCURRENT/FUNDOESCALA_I)*2047.5f);
+    static const int LIMITLO_OVERCURRENT =  (int) ((1 - OVERCURRENT/FUNDOESCALA_I)*2047.5f);
+    static const double km_DC = 0.00024420024420024420024f;  // 1 / 2^12
+    static const double km_AC = 0.00048840048840048840048f;  // 1 / 2^11
     static const float km_i = FUNDOESCALA_I * km_AC;
     static const float km_vdc = FUNDOESCALA_VDC * km_DC;
     static const float km_vac = FUNDOESCALA_VAC * km_AC;
@@ -43,6 +43,12 @@ struct ADC
     float icf;
     float ibf;
     float pot;
+
+    float iu_over;
+    float iv_over;
+    float vdc_over;
+
+    float vdc;
 
     void read(void);
     static void setup(void);

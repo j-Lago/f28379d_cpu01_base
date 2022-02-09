@@ -13,9 +13,9 @@ PAGE 0:
    	//--------------------------------------------------------------------------------------------------------
 
 	//-- RAM CPU1 / CLA --------------------------------------------------------------------------------------
-
+//	LS0_1      	: origin = 0x008000,   	length = 0x001000
 // 	LS0        	: origin = 0x008000,   	length = 0x000800
-   	LS1        	: origin = 0x008800,   	length = 0x000800
+ 	LS1        	: origin = 0x008800,   	length = 0x000800
 
    	LS4_5       : origin = 0x00A000,   	length = 0x001000
    	//--------------------------------------------------------------------------------------------------------
@@ -65,8 +65,9 @@ PAGE 0:
 PAGE 1:
 	BOOT_RSVD   : origin = 0x000002,	length = 0x000121	// part of M0, BOOT rom will use this for stack
 	M1         	: origin = 0x000400, 	length = 0x0003F8
-	LS2    		: origin = 0x009000,   	length = 0x000800
-   	LS3    		: origin = 0x009800,   	length = 0x000800
+	LS2_3    		: origin = 0x009000,   	length = 0x001000
+	//LS2    		: origin = 0x009000,   	length = 0x000800
+   	//LS3    		: origin = 0x009800,   	length = 0x000800
    	CLAtoCPU  	: origin = 0x001480,   	length = 0x000080	// msg
    	CPUtoCLA  	: origin = 0x001500,   	length = 0x000080   // msg
 
@@ -85,9 +86,9 @@ SECTIONS
    	//--------------------------------------------------------------------------------------------------------
 
    	//-- Uninitialized ---------------------------------------------------------------------------------------
-   	.ebss            : >  LS2,		PAGE = 1		// must be in RAM
+   	.ebss            : >  LS2_3,	PAGE = 1		// must be in RAM
    	.stack           : >  M1,		PAGE = 1  		// must be in low 64K RAM (stack pointer is a 16 bit register)
-   	.esysmem         : >  LS3,		PAGE = 1  		// must be in RAM
+   	.esysmem         : >  LS2_3,	PAGE = 1  		// must be in RAM
    	//--------------------------------------------------------------------------------------------------------
 
 

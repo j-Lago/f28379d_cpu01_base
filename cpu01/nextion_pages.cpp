@@ -7,12 +7,10 @@
 
 #include "globals.h"
 #include "nextion.h"
+#include "cla.h"
 
-//using namespace Nextion;
-
-Parameter NextionP0::par[PAR_SIZE] = PAR_INIT;
 PWM& NextionP0::modulator = PWM::getInstance();
-
+ParList& NextionP0::par = ParList::getInstance();
 
 // Nextion page 0
 NextionP0::NextionP0()
@@ -28,7 +26,7 @@ NextionP0::NextionP0()
 
 void NextionP0::inc_sel()
 {
-    if(++par_sel >= PAR_SIZE)
+    if(++par_sel >= ParList::len)
         par_sel = 0;
     sel_refresh();
 }
@@ -36,7 +34,7 @@ void NextionP0::inc_sel()
 void NextionP0::dec_sel()
 {
     if(--par_sel < 0)
-        par_sel = PAR_SIZE-1;
+        par_sel = ParList::len -1;
     sel_refresh();
 }
 
@@ -152,12 +150,14 @@ void NextionP0::handleCommand(fixed_string<16> s16_rx)
 
 void NextionP0::handleSlider(fixed_string<16> s16_rx)
 {
-    if(par[par_sel].type == read_only){
+    if(par[par_sel]->getType() == read_only){
         mode = hmi_err;
-        last_err = try_edit;
+        last_err = try_write;
     }
     else{
-        par[par_sel].set_value( ((float)s16_rx[2]) * 0.004f * (par[par_sel].max_value-par[par_sel].min_value) + par[par_sel].min_value);
+        float min = ((fParReadWrite*)par[par_sel])->getMin();
+        float max = ((fParReadWrite*)par[par_sel])->getMax();
+        par[par_sel]->setValue( ((float)s16_rx[2]) * 0.004f * (max-min ) + min);
         mode = hmi_slider;
     }
 
@@ -177,7 +177,7 @@ void NextionP0::pressedKey(char key)
     else if (key == '-')          { if     (input.char_cmp(0, '-')) input.set(0, '+');
                                     else if(input.char_cmp(0, '+')) input.set(0, '-');
                                     else                     input.push_left('-');
-                                    editing_refresh();                                     } //
+                                    editing_refresh();                                 } //
 
 }
 
@@ -218,57 +218,64 @@ void NextionP0::sel_refresh()
     pending_refresh = true;
 }
 
-
-
 void NextionP0::refresh(void)
 {
     if(pending_refresh)
     {
-        txt_name.txt( par[par_sel].name );
-        txt_description.txt(par[par_sel].description);
-        txt_unit.txt(par[par_sel].um );
+        txt_name.txt( par[par_sel]->name );
+        txt_description.txt(par[par_sel]->description);
+        txt_unit.txt(par[par_sel]->um );
 
 
         if(mode == hmi_refresh | mode == hmi_slider | mode == hmi_selection | mode == hmi_init)
         {
             cursor_status = false;
             input.clear();
-            input << par[par_sel].value; // load par value
+            input << par[par_sel]->getValue(); // load par value
         }
-        else if(mode == hmi_update)
+        else if(mode == hmi_update) // ENTER
         {
             cursor_status = false;
-            if(par[par_sel].type != read_only)
+            if(par[par_sel]->getType() != read_only)
             {
-                if (!par[par_sel].set_value(input.to_float()))
-                {
+                last_err = par[par_sel]->setValue(input.to_float());
+                if (last_err != no_err)
                     mode = hmi_err;
-                    last_err = (par[par_sel].value == par[par_sel].max_value) ? limit_max : limit_min;
-                }
             }
 
             input.clear();
-            input << par[par_sel].value;
+            input << par[par_sel]->getValue();
         }
 
         // sinaliza erro se tentar editar vaiável somente leitura
-        if( (mode == hmi_edit | mode == hmi_slider) & par[par_sel].type == read_only)
+        if( (mode == hmi_edit | mode == hmi_slider) & par[par_sel]->getType() == read_only)
         {
             mode = hmi_err;
-            last_err = try_edit;
+            last_err = try_write;
 
             input.clear();
-            input << par[par_sel].value;
+            input << par[par_sel]->getValue();
         }
 
         // atualiza slider para modos diferentes de edit
         uint16_t h1val;
         static hmi_mode mode_;
         if(mode == hmi_update | mode == hmi_refresh | mode == hmi_err){
-            h1val = (1.0f / (par[par_sel].max_value - par[par_sel].min_value) * (par[par_sel].value - par[par_sel].min_value) * 250.0f);
-            sld_slider.val(h1val, (mode_ != mode & mode == hmi_err) | mode == hmi_update); // só atualiza slider quando há mudanças
+            if(par[par_sel]->getType() == read_write)
+            {
+                float min = ((fParReadWrite*)par[par_sel])->getMin();
+                float max = ((fParReadWrite*)par[par_sel])->getMax();
+                h1val = 250.0 * ( par[par_sel]->getValue() - min) / (max - min);
+                sld_slider.val(h1val, (mode_ != mode & mode == hmi_err) | mode == hmi_update); // só atualiza slider quando há mudanças
+            }
             mode_ = mode;
         }
+
+        if( mode == hmi_selection )
+            if (par[par_sel]->getType() == read_write)
+                sld_slider.enable();
+            else
+                sld_slider.disable();
 
         // modo insert
         txt_input.txt(input);
@@ -284,7 +291,7 @@ void NextionP0::refresh(void)
         }
 
         // parameter name and description color
-        switch(par[par_sel].type)
+        switch(par[par_sel]->getType())
         {
                 case error       :  { txt_name.color(terracotta);       txt_description.color(terracotta);      }
          break; case read_write  :  { txt_name.color(darkslateblue);    txt_description.color(darkslateblue);   }
@@ -292,42 +299,25 @@ void NextionP0::refresh(void)
         }
 
 
-        num_state.val(modulator.en);    // ayaliza status
+        num_state.val(modulator.en);    // atuliza status
         btn_reverse.state(cla_dir);   // botão direção
 
         // msg erro
         if(mode == hmi_err)
             switch(last_err)
             {
-                   case limit_min   :  txt_error.txt("value < MIN");
-            break; case limit_max   :  txt_error.txt("value > MAX");
-            break; case try_edit    :  txt_error.txt("read only");
+               case limit_min   :  txt_error.txt("value < MIN");
+               break; case limit_max   :  txt_error.txt("value > MAX");
+               break; case try_write   :  txt_error.txt("read only");
+               break; case no_err      :  txt_error.txt("no error");
             }
         else
             txt_error.clear();
 
-
-        /*
         // log
-        txt_log.txt("log:\\r  ");
-        switch(mode)
-        {
-                case hmi_update:    {txt_log << "value updated";          }
-        break;  case hmi_edit:      {txt_log << "edit mode";              }
-        break;  case hmi_err:       {txt_log << "input error";            }
-        break;  case hmi_slider:    {txt_log << "slider changed";         }
-        break;  case hmi_selection: {txt_log << "par selection";          }
-        break;  case hmi_refresh:   {txt_log << "hmi_refresh";            }
-        break;  case hmi_waiting:   {txt_log << "hmi_waiting";            }
-        break;  case hmi_init:      {txt_log << "hmi_init";               }
-        }
-
-        txt_log << "\\r  par_id: " << (long) par_sel;
-        txt_log.color( (mode == hmi_err) ? red : gray);
-
-        if(mode != hmi_refresh)
-            txt_log.update();
-        */
+        //txt_log.txt("log:\\r  ");
+        //txt_log.text << h1val;
+        //txt_log.update();
 
         txt_name.update();
         txt_description.update();
@@ -345,9 +335,6 @@ void NextionP0::refresh(void)
         pending_refresh = false;
 
     }
-
-
-
 }
 
 

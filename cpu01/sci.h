@@ -13,6 +13,7 @@
 #pragma once
 
 #include "fifo.h"
+#include "fixed_string.h"
 
 
 #if CPU_FRQ_200MHZ

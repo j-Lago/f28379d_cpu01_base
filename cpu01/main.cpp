@@ -11,14 +11,14 @@
 #include "pwm.h"
 #include "adc.h"
 #include "cla.h"
+#include "parameters.h"
 
-void load_defaults();
 void hardware_setup();
 
 void main(void)
 {
     hardware_setup();
-    load_defaults();
+    page0.par.loadDefaults();
 
     while(true)
     {
@@ -48,16 +48,4 @@ void hardware_setup()
     ADC::start();
     SCI::start();
     EnableInterrupts();
-}
-
-
-void load_defaults()
-{
-    // inicialização de variáveis do cla
-    // TODO: linkar inicialização com valores padrão da tabela parameters_default.h
-
-    cla_dq[0] = 1.0f;
-    cla_dq[1] = 0.0f;
-    cla_dir = 1.0f;
-    cla_th = 0.0f;
 }

@@ -7,11 +7,11 @@
 
 #pragma once
 #include "nextion.h"
+#include "parameters.h"
 
 using namespace Nextion;
 
 enum hmi_mode {hmi_update, hmi_edit, hmi_err, hmi_refresh, hmi_slider, hmi_waiting, hmi_selection, hmi_init};
-enum focus_error {limit_min, limit_max, try_edit, no_err};
 
 class NextionP0 : public Nextion::Page
 {
@@ -28,7 +28,7 @@ public:
 
     static PWM& modulator;
     hmi_mode mode;
-    focus_error last_err;
+    ParError last_err;
 
     string16 input;
     bool cursor_status;
@@ -37,7 +37,8 @@ public:
     bool pending_refresh;
 
     int16_t par_sel;
-    static Parameter par[];
+    //static Parameter par[];
+    static ParList& par;
 
     NextionP0();
     void inc_sel();

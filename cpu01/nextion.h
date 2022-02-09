@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "parameters_default.h"
 #include "sci.h"
 #include "pwm.h"
 #include "fixed_string.h"
@@ -91,10 +90,12 @@ namespace Nextion
         fixed_string<32>& clear();
 
         fixed_string<32>& operator<<(const char *str);
+        fixed_string<32>& operator<<(fixed_string<5> name);
         fixed_string<32>& operator<<(string16 name);
         fixed_string<32>& operator<<(string32 name);
 
         fixed_string<32>& txt(const char *str);
+        fixed_string<32>& txt(fixed_string<5> name);
         fixed_string<32>& txt(string16 name);
         fixed_string<32>& txt(string32 name);
 
@@ -142,7 +143,9 @@ namespace Nextion
     {
     private:
         int16_t value;
+        bool visibility;
         bool refresh_value;
+        bool refresh_visibility;
 
     public:
         Slider(const char* name, int16_t value = 0);
@@ -150,6 +153,8 @@ namespace Nextion
         void val(int16_t value, bool force = false);
         uint16_t val() const;
         void update(bool force = false);
+        void enable(void);
+        void disable(void);
     };
 
 

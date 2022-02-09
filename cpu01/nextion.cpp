@@ -9,7 +9,6 @@
 #include "fixed_string.h"
 #include "globals.h"
 #include "sci.h"
-#include "parameters_default.h"
 #include "pwm.h"
 #include "nextion.h"
 
@@ -82,6 +81,13 @@ fixed_string<32>& Text32::txt(const char* str)
     return text;
 }
 
+fixed_string<32>& Text32::txt(fixed_string<5> str)
+{
+    text.clear();
+    text << str;
+    return text;
+}
+
 fixed_string<32>& Text32::txt(string16 str)
 {
     text.clear();
@@ -111,6 +117,12 @@ fixed_string<32>& Text32::operator<<(const char* str)
 }
 
 fixed_string<32>& Text32::operator<<(string16 str)
+{
+    text << str;
+    return text;
+}
+
+fixed_string<32>& Text32::operator<<(fixed_string<5> str)
 {
     text << str;
     return text;
@@ -187,9 +199,38 @@ void Picture2::update(bool force)
 
 
 Slider::Slider(const char* name, int16_t value)
-    : Component(name), value(value) { refresh_value = true; }
+    : Component(name), value(value)
+{
+    refresh_value = true;
+    refresh_visibility = true;
+    visibility = true;
+}
+
 Slider::Slider(string16 name, int16_t value)
-    : Component(name), value(value) { refresh_value = true; }
+    : Component(name), value(value)
+{
+    refresh_value = true;
+    refresh_visibility = true;
+    visibility = true;
+}
+
+void Slider::enable()
+{
+    if(!visibility)
+    {
+        visibility = true;
+        refresh_visibility = true;
+    }
+}
+
+void Slider::disable()
+{
+    if(visibility)
+    {
+        visibility = false;
+        refresh_visibility = true;
+    }
+}
 
 void Slider::val(int16_t value, bool force)
 {
@@ -206,10 +247,20 @@ uint16_t Slider::val() const
 
 void Slider::update(bool force)
 {
-    if(force | refresh_value)
+    if(force | refresh_visibility)
     {
         string32 temp;
-        send(temp << objname << ".val=" << (uint16_t)value << "ÿÿÿ");
-        refresh_value = false;
+        temp << "tsw " << objname << "," << (long)visibility <<  "ÿÿÿ";
+        temp << "vis " << objname << "," << (long)visibility <<  "ÿÿÿ";
+        send(temp);
+
+        refresh_visibility = false;
     }
+
+    if(force | refresh_value | refresh_visibility)
+   {
+       string32 temp;
+       send(temp << objname << ".val=" << (uint16_t)value << "ÿÿÿ");
+       refresh_value = false;
+   }
 }

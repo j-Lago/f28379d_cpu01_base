@@ -7,8 +7,10 @@
 
 #pragma once
 
-#include "gpio.h"
 #include "nextion_pages.h"
+#include "gpio.h"
+#include "adc.h"
+#include "pwm.h"
 
 #define REFRESH_COMP 5000 // 4 Hz
 
@@ -20,3 +22,5 @@ extern OutPin logic2;
 extern OutPin logic3;
 
 extern NextionP0 page0;
+extern ADC& adc;
+extern PWM& pwm;

@@ -7,6 +7,8 @@
 
 #include "globals.h"
 #include "F28x_Project.h"
+#include "adc.h"
+#include "pwm.h"
 
 
 
@@ -19,5 +21,7 @@ OutPin logic2(18, active_high);
 OutPin logic3(67, active_high);
 
 NextionP0 page0;
+ADC& adc = ADC::getInstance();
+PWM& pwm = PWM::getInstance();
 
 
