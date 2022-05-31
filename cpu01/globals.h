@@ -24,3 +24,5 @@ extern OutPin logic3;
 extern NextionP0 page0;
 extern ADC& adc;
 extern PWM& pwm;
+
+extern PROT prot;

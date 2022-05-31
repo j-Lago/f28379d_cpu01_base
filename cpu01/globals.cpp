@@ -24,4 +24,6 @@ NextionP0 page0;
 ADC& adc = ADC::getInstance();
 PWM& pwm = PWM::getInstance();
 
+PROT prot;
+
 

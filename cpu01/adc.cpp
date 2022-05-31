@@ -6,14 +6,17 @@
  */
 
 
-
 #include "F28x_Project.h"
 #include "globals.h"
 #include "pwm.h"
 #include "cla.h"
 #include "adc.h"
+#include "controle.h"
 
-// Interrupção de final de conversão do ADC
+
+
+
+// Interrupï¿½ï¿½o de final de conversï¿½o do ADC
 interrupt void adca1_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
@@ -21,33 +24,96 @@ interrupt void adca1_isr(void)
     logic2.set();
 
     // logica para ligar, desligar e clear pelo debuger
-    if(pwm.en)
+    if(pwm.en){
         pwm.enable();
-    else if(!pwm.fault)
+    }
+    else if(!pwm.fault){
         pwm.clear();
+        prot.clear();
+    }
 
-    adc.read(); // aplica ganhos e offsets nas medições
+    adc.read(); // aplica ganhos e offsets nas mediï¿½ï¿½es
 
 
     //
-    // aqui vai o código que CPU1 escreve nas variáveis compartilhadas com CLA (dados enviados para o CLA)
+    // aqui vai o cï¿½digo que CPU1 escreve nas variï¿½veis compartilhadas com CLA (dados enviados para o CLA)
     //
+
+
+    //--------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------
+
+
+    //PROTEï¿½ï¿½ES
+    if(fabsf(adc.iu) > prot.iu)
+        prot.erro[0] = 1;
+
+    if(fabsf(adc.iv) > prot.iv)
+        prot.erro[1] = 1;
+
+    if(fabsf(adc.vp0) > prot.vp0)
+        prot.erro[2] = 1;
+
+    if(fabsf(adc.v0n) > prot.v0n)
+        prot.erro[3] = 1;
+
+    if(fabsf(adc.vrs) > prot.vrs)
+        prot.erro[4] = 1;
+
+    if(fabsf(adc.vts) > prot.vts)
+        prot.erro[5] = 1;
+
+    if(fabsf(adc.ic) > prot.ic)
+        prot.erro[6] = 1;
+
+    if(fabsf(adc.ib) > prot.ib)
+        prot.erro[7] = 1;
+
+    for(int k = 0; k < prot.Nch; k++){
+        if(prot.erro[k] and !pwm.fault){
+            pwm.trip();
+            prot.valor[0] = adc.iu;
+            prot.valor[1] = adc.iv;
+            prot.valor[2] = adc.vp0;
+            prot.valor[3] = adc.v0n;
+            prot.valor[4] = adc.vrs;
+            prot.valor[5] = adc.vts;
+            prot.valor[6] = adc.ic;
+            prot.valor[7] = adc.ib;
+            adc.iv_over = adc.iv;
+            adc.iu_over = adc.iu;
+            adc.vdc_over = adc.vdc;
+            break;
+        }
+    }
+
+
+    //--------------------------------------------------------------------------------------
+
+
+
+    controle();
+
+
+
+    //--------------------------------------------------------------------------------------
     if(pwm.en)
     {
         Cla1ForceTask1(); // dispara task 1 do CLA
         //
-        // aqui vai o código que CPU1 executa que independe do resultado dos cálculos do CLA task1 (execução CPU e CLA em paralelo)
+        // aqui vai o cï¿½digo que CPU1 executa que independe do resultado dos cï¿½lculos do CLA task1 (execuï¿½ï¿½o CPU e CLA em paralelo)
         //
 
-        while(Cla1Regs.MIRUN.bit.INT1 == 1); // aguarda até CLA task 1 finalizar. Alternativamente, pode-se habilitar em CLA_setup() uma interrupção para esse evento
-        // ... while(Cla1Regs.MIRUN.bit.INT8 == 1); // aguarda até CLA task 8 finalizar
+        while(Cla1Regs.MIRUN.bit.INT1 == 1); // aguarda atï¿½ CLA task 1 finalizar. Alternativamente, pode-se habilitar em CLA_setup() uma interrupï¿½ï¿½o para esse evento
+        // ... while(Cla1Regs.MIRUN.bit.INT8 == 1); // aguarda atï¿½ CLA task 8 finalizar
 
         //
-        // aqui vai o código que CPU1 executa que depende do resultado dos cálculos do CLA
+        // aqui vai o cï¿½digo que CPU1 executa que depende do resultado dos cï¿½lculos do CLA
         //
     }
 
-    pwm.setComps(cla_abc);
+    //pwm.setComps(cla_abc);
+
 
     if(refresh_count++ >= REFRESH_COMP){
         led_az.toggle();
@@ -63,13 +129,13 @@ interrupt void adca1_isr(void)
 }
 
 //
-// Interrupção chamada quando conversão do ADCA excecer limite predefinido em OVERCURRENT
+// Interrupï¿½ï¿½o chamada quando conversï¿½o do ADCA excecer limite predefinido em OVERCURRENT
 //
 interrupt void adca_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
+    //adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    //adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    //adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
@@ -78,13 +144,13 @@ interrupt void adca_ppb_isr(void)
 }
 
 //
-// Interrupção chamada quando conversão do ADCB excecer limite predefinido em OVERCURRENT
+// Interrupï¿½ï¿½o chamada quando conversï¿½o do ADCB excecer limite predefinido em OVERCURRENT
 //
 interrupt void adcb_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
+    //adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    //adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    //adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
@@ -94,24 +160,35 @@ interrupt void adcb_ppb_isr(void)
 
 void ADC::read()
 {
-    iu =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*km_i;        // iu  -> pino 26
-    iv =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*km_i;        // iv  -> pino 25
-    vp0 = AdccResultRegs.ADCRESULT3 * km_vdc;               // vp0 -> pino 24
-    v0n = AdcbResultRegs.ADCRESULT3 * km_vdc;               // v0n -> pino 23
+    iu =  (AdcaResultRegs.ADCRESULT0 - 1899.4f)*0.006171422365f;        // iu  -> pino 26
+    iv =  (AdcbResultRegs.ADCRESULT0 - 2036.4f)*0.006171422365f;        // iv  -> pino 25
+//    iu =  (AdcaResultRegs.ADCRESULT0);        // iu  -> pino 26
+//    iv =  (AdcbResultRegs.ADCRESULT0);        // iv  -> pino 25
+    vp0 = (AdccResultRegs.ADCRESULT3 - 0)*0.08775538f;               // vp0 -> pino 24
+    v0n = (AdcbResultRegs.ADCRESULT3 - 0.2f)*0.08775538f;               // v0n -> pino 23
 
-    vrs = (AdcbResultRegs.ADCRESULT2 - 2047.5) * km_vac;    // vrs -> pino 28
-    vts = (AdccResultRegs.ADCRESULT2 - 2047.5) * km_vac;    // vts -> pino 27
-    ic =  (AdcaResultRegs.ADCRESULT1 - 2047.5) * km_i;      // ic  -> pino 29
-    ib =  (AdccResultRegs.ADCRESULT1 - 2047.5) * km_i;      // ib  -> pino 64
+//    vrs = AdcbResultRegs.ADCRESULT2;    // vrs -> pino 28
+//    vts = AdccResultRegs.ADCRESULT2;    // vts -> pino 27
+    vrs = (AdcbResultRegs.ADCRESULT2 - 1938.6f)*0.336042171336f;    // vrs -> pino 28
+    vts = (AdccResultRegs.ADCRESULT2 - 1945.0f)*0.336042171336f;    // vts -> pino 27
 
-    vrsf = (AdccResultRegs.ADCRESULT5 - 2047.5) * km_vac;    // vrs2 -> pino 67
-    vtsf = (AdcaResultRegs.ADCRESULT5 - 2047.5) * km_vac;    // vts2 -> pino 66
-    icf =  (AdcaResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ic2  -> pino 63
-    ibf =  (AdcbResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ib2  -> pino 65
 
-    pot = AdcaResultRegs.ADCRESULT6 * (float)km_DC * 100.0f; // DAC_A(JA3) -> pino 30
+//    ic =  (AdcaResultRegs.ADCRESULT1);      // ic  -> pino 29
+//    ib =  (AdccResultRegs.ADCRESULT1);      // ib  -> pino 64
+
+    ic =  -(AdcaResultRegs.ADCRESULT1 - 2035.0f)*0.012085702131f;      // ic  -> pino 29
+    ib =  -(AdccResultRegs.ADCRESULT1 - 2035.0f)*0.012085702131f;      // ib  -> pino 64
+
+
+    vrsf = (AdccResultRegs.ADCRESULT5 - 934.0f);    // vrs2 -> pino 67
+    vtsf = (AdcaResultRegs.ADCRESULT5 - 144.2f);    // vts2 -> pino 66
+    icf =  (AdcaResultRegs.ADCRESULT4 - 476.0f);      // ic2  -> pino 63
+    ibf =  AdcbResultRegs.ADCRESULT4;      // ib2  -> pino 65
+
+    pot = AdcaResultRegs.ADCRESULT6; // DAC_A(JA3) -> pino 30
 
     vdc = vp0+v0n;
+    //pot = vdc;
 }
 
 void ADC::setup()
@@ -122,9 +199,9 @@ void ADC::setup()
 
     EALLOW;
 
-    PieVectTable.ADCA1_INT = &adca1_isr; // mapeia a função a ser chamada pela interrupção do ADCA
-    PieVectTable.ADCA_EVT_INT = &adca_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCa - iu)
-    PieVectTable.ADCB_EVT_INT = &adcb_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCb - iv)
+    PieVectTable.ADCA1_INT = &adca1_isr; // mapeia a funï¿½ï¿½o a ser chamada pela interrupï¿½ï¿½o do ADCA
+    PieVectTable.ADCA_EVT_INT = &adca_ppb_isr; // mapeia a funï¿½ï¿½o a ser chamada pela interrupï¿½ï¿½o do PPB (limites ADCa - iu)
+    PieVectTable.ADCB_EVT_INT = &adcb_ppb_isr; // mapeia a funï¿½ï¿½o a ser chamada pela interrupï¿½ï¿½o do PPB (limites ADCb - iv)
 
     AdcaRegs.ADCCTL2.bit.PRESCALE = 6; //set ADCCLK divider to /4
     AdcSetMode(ADC_ADCA, adc_res, adc_mode);
@@ -249,7 +326,7 @@ void ADC::setup()
     AdcaRegs.ADCSOC6CTL.bit.ACQPS = acqps;    //sample window is 100 SYSCLK cycles
     AdcaRegs.ADCSOC6CTL.bit.TRIGSEL = 5;      //trigger on ePWM1 SOCA/
 
-    //interrupção de fim de conversão
+    //interrupï¿½ï¿½o de fim de conversï¿½o
     AdcaRegs.ADCINTSEL1N2.bit.INT1SEL = 6;    //end of SOC2 will set INT1 flag
     AdcaRegs.ADCINTSEL1N2.bit.INT1E = 1;      //enable INT1 flag
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;    //make sure INT1 flag is cleared
@@ -284,7 +361,7 @@ void ADC::start(void)
 
     EALLOW;
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;  //clear INT1 flag
-    EPwm1Regs.ETSEL.bit.SOCAEN = 1;         // habilita sequenciador de conversão (SOCA) disparado pelo PWM
+    EPwm1Regs.ETSEL.bit.SOCAEN = 1;         // habilita sequenciador de conversï¿½o (SOCA) disparado pelo PWM
     EDIS;
 }
 
@@ -475,5 +552,4 @@ ADC::ADC()
     ibf = 0.f;
     pot = 0.f;
 }
-
 

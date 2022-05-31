@@ -20,8 +20,8 @@ struct ADC
 {
     static const float OVERCURRENT = 12.0f;
     static const float FUNDOESCALA_I = 20.0f;
-    static const float FUNDOESCALA_VAC = 400.0f;
-    static const float FUNDOESCALA_VDC = 20.0f;
+    static const float FUNDOESCALA_VAC = 20.0f;
+    static const float FUNDOESCALA_VDC = 400.0f;
     static const int LIMITHI_OVERCURRENT =  (int) ((1 + OVERCURRENT/FUNDOESCALA_I)*2047.5f);
     static const int LIMITLO_OVERCURRENT =  (int) ((1 - OVERCURRENT/FUNDOESCALA_I)*2047.5f);
     static const double km_DC = 0.00024420024420024420024f;  // 1 / 2^12
@@ -64,7 +64,32 @@ private:
     ADC();
 public:
     static ADC& getInstance();
-    ADC(const ADC&) = delete;  // impede construtor de cópia
-
+    ADC(const ADC&) = delete;  // impede construtor de cï¿½pia
 };
 
+struct PROT //PROTEï¿½ï¿½ES
+    {
+        static const int Nch = 8;
+        static const float iu = 3.0f;
+        static const float iv = iu;
+        static const float vp0 = 45.0f;
+        static const float v0n = vp0;
+        static const float vrs = 9999.0f;
+        static const float vts = vrs;
+        static const float ic = iu;
+        static const float ib = iu;
+        int erro[Nch];
+        float valor[Nch];
+
+        PROT(){
+            clear();
+        }
+
+        void clear(){
+            for (int k=1; k<Nch; k++){
+                erro[k] = 0;
+                valor[k] = 0;
+            }
+        }
+
+    };
