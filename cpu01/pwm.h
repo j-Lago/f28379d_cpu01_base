@@ -42,7 +42,7 @@ private:
     static const uint16_t CMP_TEMPO_MORTO = 38; // CMP_TEMPO_MORTO*40ns: 38 -> 1.52us
     static const uint16_t CMP_PORTADORA = 1250; // 1250 -> 10kHz
 
-    static const float GAIN = (float)(CMP_PORTADORA)*0.5f - (float)CMP_TEMPO_MORTO*0.25f;
+    static const float GAIN = ((float)(CMP_PORTADORA)*0.5f - (float)CMP_TEMPO_MORTO*0.25f);
     static const float BIAS = (float)(CMP_PORTADORA)*0.5f + (float)(CMP_TEMPO_MORTO+1)*0.25f;
 
 public:

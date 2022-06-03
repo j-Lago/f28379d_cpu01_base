@@ -57,9 +57,12 @@ float vq, vd, vq_, ia, ib, ic = 0.0;
 float th, th_=0.0; //Theta inicial.
 float w, w_ = 60.0; //Frequência inicial.
 
-float ipref; //Referencial de corrente a ser adicionada no controle de seq+
+float ipref = 2.5f; //Referencial de corrente a ser adicionada no controle de seq+
+float iqref = 0.0f; //
+
 float vdc; //Tensão no link CC
-float enn, enp; //enn: Liga controle seq- //enp: Liga controle seq+
+bool enn = false;
+bool enp = false; //enn: Liga controle seq- //enp: Liga controle seq+
 
 float m_abc[3] = {0.0f, 0.0f, 0.0f};
 float m_dq[2] = {1.0f, 0.0f};
@@ -82,20 +85,13 @@ void controle(void){
     w = aw+W0;
 
     th = (w + w_)*Ta/2.0 + th_; //Demonstrado na planilha
-    if(th > 2*PI)
+    if(th > 2*PI){
         th -= 2*PI;
+        //logic3.set();
+    }else{
+        //logic3.clear();
+    }
 
-
-    if (th >= 0){
-        zero_cross = !semiciclo;
-        semiciclo = true;
-    }else
-        semiciclo = false;
-
-    if(zero_cross)
-        logic3.set();
-    else
-        logic3.clear();
 
 
 
@@ -106,15 +102,58 @@ void controle(void){
     float cossqrt3_2 = 0.86602540378443864676372317075294f * cos_th;
     float sinsqrt3_2 = 0.86602540378443864676372317075294f * sin_th;
 
-    m_dq[0] = cla_dq[0];
-    m_dq[1] = cla_dq[1];
 
-    m_abc[1] = cos_th*m_dq[0]                + sin_th*m_dq[1];
+
+    //-------------------------------------------------------------------------------------------------
+    //Controle seq+:
+    //Transformada de park seq+:
+    ia = -adc.iu;
+    ib = -adc.iv;
+    ic = -ia -ib;
+    enp = pwm.en;
+
+
+    idp =  (-ic+ib)*sqrt(3.0f)/3.0f*sin_th + (2.0f*ia-ib-ic)/3.0f*cos_th;
+    iqp = -(-ic+ib)*sqrt(3.0f)/3.0f*cos_th + (2.0f*ia-ib-ic)/3.0f*sin_th;
+
+
+
+    if(!enp){ //Desativa a injeção de corrente de seq+ quando enp estiver em zero
+        dp = 0.8;
+        qp = -0.22;
+        PI_dp = 0.0f;
+        PI_qp = 0.0f;
+    }else{
+        //PI:
+        PI_dp = ipref-idp;
+        PI_qp = iqref-iqp;
+        dp = K1_PISP*PI_dp  - K2_PISP*PI_dp_ + dp_;
+        qp = K1_PISP*PI_qp  - K2_PISP*PI_qp_ + qp_;
+    }
+
+
+
+    //-------------------------------------------------------------------------------------------------
+
+
+
+
+
+    //-------------------------------------------------------------------------------------------------
+    // atualiza modulador
+    if(enp){ //true = manual; false = automatico
+        m_dq[0] = dp;
+        m_dq[1] = qp;
+    }else{
+        m_dq[0] = cla_dq[0];
+        m_dq[1] = cla_dq[1];
+    }
+
+    m_abc[1] = cos_th*m_dq[0]              + sin_th*m_dq[1];
     m_abc[0] = (-cos_2+sinsqrt3_2)*m_dq[0] - (sin_2 + cossqrt3_2)*m_dq[1];
     m_abc[2] = (-cos_2-sinsqrt3_2)*m_dq[0] + (-sin_2 + cossqrt3_2)*m_dq[1];
-
     pwm.setComps(m_abc);
-
+    //-------------------------------------------------------------------------------------------------
 
 
     //Atualiza variáveis:

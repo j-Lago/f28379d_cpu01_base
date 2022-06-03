@@ -70,14 +70,14 @@ public:
 struct PROT //PROTE��ES
     {
         static const int Nch = 8;
-        static const float iu = 3.0f;
+        static const float iu = 8.0f;
         static const float iv = iu;
-        static const float vp0 = 45.0f;
+        static const float vp0 = 80.0f;
         static const float v0n = vp0;
-        static const float vrs = 9999.0f;
+        static const float vrs = 80.0f;
         static const float vts = vrs;
-        static const float ic = iu;
-        static const float ib = iu;
+        static const float ic = 10.0f;
+        static const float ib = 10.0f;
         int erro[Nch];
         float valor[Nch];
 
@@ -86,7 +86,7 @@ struct PROT //PROTE��ES
         }
 
         void clear(){
-            for (int k=1; k<Nch; k++){
+            for (int k=0; k<Nch; k++){
                 erro[k] = 0;
                 valor[k] = 0;
             }

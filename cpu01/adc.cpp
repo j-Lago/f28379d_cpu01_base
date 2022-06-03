@@ -87,6 +87,10 @@ interrupt void adca1_isr(void)
         }
     }
 
+    if(pwm.fault)
+        logic3.set();
+    else
+        logic3.clear();
 
     //--------------------------------------------------------------------------------------
 
@@ -99,6 +103,7 @@ interrupt void adca1_isr(void)
     //--------------------------------------------------------------------------------------
     if(pwm.en)
     {
+        //fan.set(); //liga o ventilador
         Cla1ForceTask1(); // dispara task 1 do CLA
         //
         // aqui vai o c�digo que CPU1 executa que independe do resultado dos c�lculos do CLA task1 (execu��o CPU e CLA em paralelo)
@@ -110,6 +115,8 @@ interrupt void adca1_isr(void)
         //
         // aqui vai o c�digo que CPU1 executa que depende do resultado dos c�lculos do CLA
         //
+    }else{
+        //fan.clear(); //liga o ventilador
     }
 
     //pwm.setComps(cla_abc);

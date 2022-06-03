@@ -20,6 +20,8 @@ OutPin logic1(19, active_high);
 OutPin logic2(18, active_high);
 OutPin logic3(67, active_high);
 
+//OutPin fan(65, active_high);
+
 NextionP0 page0;
 ADC& adc = ADC::getInstance();
 PWM& pwm = PWM::getInstance();

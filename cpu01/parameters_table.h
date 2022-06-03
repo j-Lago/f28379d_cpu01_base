@@ -12,8 +12,8 @@
         /*             ( &var            ,  name     ,  um       ,  description                      ,   dfault ,     min ,       max )*/   \
         /*  Class      (                 , "*****"   , "*****"   , "********************************",          ,         ,           )*/   \
         fParReadWrite  ( &cla_f          , "W010"    , "Hz"      , "Frequency"                       ,    60.0f ,    0.0f ,     90.0f ),    \
-        fParReadWrite  ( &cla_dq[0]      , "W011"    , ""        , "d - modulation index"            ,     1.0f ,    0.0f ,      1.2f ),    \
-        fParReadWrite  ( &cla_dq[1]      , "W012"    , ""        , "q - modulation index"            ,     0.0f ,   -0.5f ,      0.5f ),    \
+        fParReadWrite  ( &cla_dq[0]      , "W011"    , ""        , "d - modulation index"            ,     0.8f ,    0.0f ,      1.2f ),    \
+        fParReadWrite  ( &cla_dq[1]      , "W012"    , ""        , "q - modulation index"            ,   -0.15f ,   -0.5f ,      0.5f ),    \
         }
 
 #define PARAMETERS_R {                                                                                                 \

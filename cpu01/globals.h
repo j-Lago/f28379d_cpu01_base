@@ -21,6 +21,8 @@ extern OutPin logic1;
 extern OutPin logic2;
 extern OutPin logic3;
 
+//extern OutPin fan;
+
 extern NextionP0 page0;
 extern ADC& adc;
 extern PWM& pwm;
