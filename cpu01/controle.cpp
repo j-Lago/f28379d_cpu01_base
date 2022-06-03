@@ -1,10 +1,3 @@
-/*
- * controle.cpp
- *
- *  Created on: May 31, 2022
- *      Author: jacksonlago
- */
-
 #include "F28x_Project.h"
 #include "globals.h"
 #include "pwm.h"
