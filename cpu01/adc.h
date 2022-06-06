@@ -74,7 +74,7 @@ struct PROT //PROTE��ES
         static const float iv = iu;
         static const float vp0 = 80.0f;
         static const float v0n = vp0;
-        static const float vrs = 80.0f;
+        static const float vrs = 150.0f;
         static const float vts = vrs;
         static const float ic = 10.0f;
         static const float ib = 10.0f;

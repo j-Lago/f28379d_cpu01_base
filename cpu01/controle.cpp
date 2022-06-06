@@ -5,6 +5,8 @@
 #include "adc.h"
 #include "controle.h"
 
+static const float sqrt3 = 1.7320508075688772935274463415059f;
+
 static const float fa = 20000.0f; //Frequência de amostragem
 static const float Ta = 1.0 / fa; //Período de amostragem
 static const float KSQRT3_6 = 0.28867513459481288225457439025098f;
@@ -19,6 +21,7 @@ static const float K2_PISN = -0.0594f;
 static const float K1_PISP = 0.0600;
 static const float K2_PISP = 0.0594f;
 static const float K_SOGI = 0.7f;
+float compseqn = 0.01f;
 
 
 //Variáveis para o SOGI:
@@ -26,6 +29,7 @@ float v0[] = {0, 0, 0};
 float v90[] = {0, 0, 0};
 float v0_[] = {0, 0, 0};
 float v90_[] = {0, 0, 0};
+float vg[] = {0,0,0};
 
 //
 float vsn[] = {0, 0, 0}; //Tensão de seq- //Tensão obtida pelo SOGI
@@ -52,6 +56,9 @@ float w, w_ = 60.0; //Frequência inicial.
 
 float ipref = 2.5f; //Referencial de corrente a ser adicionada no controle de seq+
 float iqref = 0.0f; //
+
+float vdnref = 0.0f; //Referencial de corrente a ser adicionada no controle de seq+
+float vqnref = 0.0f; //
 
 float vdc; //Tensão no link CC
 bool enn = false;
@@ -125,11 +132,53 @@ void controle(void){
     }
 
 
+    //-------------------------------------------------------------------------------------------------
+    //Desconsiderando as componentes de seq0:
+    vg[0] = -1.0/3.0*adc.vts + 2.0/3.0*adc.vrs;
+    vg[1] = -1.0/3.0*adc.vts - 1.0/3.0*adc.vrs;
+    vg[2] =  2.0/3.0*adc.vts - 1.0/3.0*adc.vrs;
 
+    //SOGI
+    for(int i=0; i<3; i++){
+
+        int1[i] = ((vg[i] - v0_[i])*K_SOGI - v90_[i])* w; //Demonstrado na planilha
+        v0[i] = (int1[i] + int1_[i])*Ta/2.0 + v0_[i];
+        int2[i] = v0[i]*w;
+        v90[i] = (int2[i] + int2_[i])*Ta/2.0 + v90_[i];
+
+        //Atualiza variáveis:
+        int1_[i] = int1[i];
+        int2_[i] = int2[i];
+        v0_[i] = v0[i];
+        v90_[i] = v90[i];
+    }
+
+    //Controle seq-:
+    //Componente de seq- da tensão:
+    //**************************Aparentemente no Artigo está invertido seq+ com seq-**************************
+    vsn[0] = -(v90[2]-v90[1])*KSQRT3_6 + (v0[0] - 0.5*v0[1] - 0.5*v0[2])*1.0/3.0; //Demonstrado na planilha
+    vsn[1] = -(v90[0]-v90[2])*KSQRT3_6 + (v0[1] - 0.5*v0[0] - 0.5*v0[2])*1.0/3.0;
+    vsn[2] = -(v90[1]-v90[0])*KSQRT3_6 + (v0[2] - 0.5*v0[1] - 0.5*v0[0])*1.0/3.0;
+
+    //Transformada de park seq-:
+    vdn =  (-vsn[2]+vsn[1])*sqrt(3.0)/3.0*sin(-th) + (2.0*vsn[0]-vsn[1]-vsn[2])/3.0*cos(-th);
+    vqn = -(-vsn[2]+vsn[1])*sqrt(3.0)/3.0*cos(-th) + (2.0*vsn[0]-vsn[1]-vsn[2])/3.0*sin(-th);
     //-------------------------------------------------------------------------------------------------
 
 
 
+    if(!enn){ //Desativa a injeção de corrente de seq- quando enn estiver em zero
+            dn = 0.0f;
+            qn = 0.0f;
+            PI_dn = 0.0f;
+            PI_qn = 0.0f;
+        }else{
+            //PI: seq-
+            PI_dn = vdnref-vdn;
+            PI_qn = vqnref-vqn;
+            dn = compseqn*PI_dn;
+            qn = compseqn*PI_qn;
+        }
 
 
     //-------------------------------------------------------------------------------------------------
@@ -142,9 +191,22 @@ void controle(void){
         m_dq[1] = cla_dq[1];
     }
 
-    m_abc[1] = cos_th*m_dq[0]              + sin_th*m_dq[1];
-    m_abc[0] = (-cos_2+sinsqrt3_2)*m_dq[0] - (sin_2 + cossqrt3_2)*m_dq[1];
-    m_abc[2] = (-cos_2-sinsqrt3_2)*m_dq[0] + (-sin_2 + cossqrt3_2)*m_dq[1];
+
+    //Transformada inversa de park seq+:
+    ap = cos_th*m_dq[0]              + sin_th*m_dq[1];
+    bp = (-cos_2+sinsqrt3_2)*m_dq[0] - (sin_2 + cossqrt3_2)*m_dq[1];
+    cp = (-cos_2-sinsqrt3_2)*m_dq[0] + (-sin_2 + cossqrt3_2)*m_dq[1];
+
+    //Transformada inversa de park seq-:
+    an =  qn * (-sin_th) +  dn * cos_th;
+    bn = ((- qn + sqrt3 * dn) * (-sin_th) - (sqrt3 * qn +  dn) * cos_th)*0.5f;
+    cn = ((- qn - sqrt3 * dn) * (-sin_th) + (sqrt3 * qn -  dn) * cos_th)*0.5f;
+
+
+    m_abc[1] = ap + an;
+    m_abc[0] = bp + bn;
+    m_abc[2] = cp + cn;
+
     pwm.setComps(m_abc);
     //-------------------------------------------------------------------------------------------------
 
