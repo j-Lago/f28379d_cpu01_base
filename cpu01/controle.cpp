@@ -5,6 +5,8 @@
 #include "adc.h"
 #include "controle.h"
 
+#include "signals.h"
+
 static const float sqrt3 = 1.7320508075688772935274463415059f;
 
 static const float fa = 20000.0f; //Frequência de amostragem

@@ -84,11 +84,11 @@
 	<variableList>
 		<variable>
 			<name>CLAMATH_ROOT</name>
-			<value>file:/C:/ti/c2000/C2000Ware_4_00_00_00/libraries/math/CLAmath/c28</value>
+			<value>$%7BCOM_TI_C2000WARE_SOFTWARE_PACKAGE_INSTALL_DIR%7D/libraries/math/CLAmath/c28</value>
 		</variable>
 		<variable>
 			<name>DATAROM_ROOT</name>
-			<value>file:/C:/ti/c2000/C2000Ware_4_00_00_00/libraries/boot_rom/f2837xd/revB</value>
+			<value>$%7BCOM_TI_C2000WARE_SOFTWARE_PACKAGE_INSTALL_DIR%7D/libraries/boot_rom/f2837xd/revB</value>
 		</variable>
 		<variable>
 			<name>INSTALLROOT_F2837XD</name>
