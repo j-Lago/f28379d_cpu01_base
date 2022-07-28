@@ -24,7 +24,7 @@ interrupt void adca1_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
 
-    logic2.set();
+    //logic2.set();
 
     // logica para ligar, desligar e clear pelo debuger
     if(pwm.en)
@@ -95,7 +95,7 @@ interrupt void adca1_isr(void)
     }
 
 
-    logic2.clear();
+    //logic2.clear();
 
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;

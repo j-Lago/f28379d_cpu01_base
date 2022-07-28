@@ -20,6 +20,7 @@
 #include "encoder.h"
 
 
+
 void Encoder::setup(void)
 {
     EALLOW;
@@ -44,8 +45,7 @@ void Encoder::setup(void)
 
 
 
-    EQep1Regs.QUPRD=2000000;          // Unit Timer for 100Hz at
-                                          // 200 MHz SYSCLKOUT
+    EQep1Regs.QUPRD=200000000/2/Fvel;          // Unit Timer for Fvel [Hz] at 200 MHz SYSCLKOUT
 
     EQep1Regs.QDECCTL.bit.QSRC=0;     //
     EQep1Regs.QDECCTL.bit.XCR=0;      // 2x resolution (cnt falling and
@@ -75,28 +75,18 @@ void Encoder::start()
 
 void Encoder::calc(){
 
-    //if(EQep1Regs.QFLG.bit.UTO==1){   // Unit Timeout event
-    if (++downsample_count >= DOWNSAMPLE){
-        int32_t delta; //polsos por período
-        downsample_count = 0;
+    if(EQep1Regs.QFLG.bit.UTO==1){   // Unit Timeout event
+        logic2.set();
+        pulse_count_ = pulse_count;
+        pulse_count = EQep1Regs.QPOSLAT;
 
-        if(EQep1Regs.QFLG.bit.UTO==1){   // Unit Timeout event
-            pulse_count_ = pulse_count;
-            pulse_count = EQep1Regs.QPOSLAT;
-
-            //if (pulse_count>pulse_count_)
-            //    delta = pulse_count - pulse_count_;
-            //else
-            //    delta = (0xFFFFFFFF-pulse_count_)+pulse_count;
-            delta = pulse_count - pulse_count_;
+        delta = pulse_count - pulse_count_;
 
 
-            w = delta * pulsepT_to_radps;
-        }
+        w = delta * pulsepT_to_radps;
         EQep1Regs.QCLR.bit.UTO=1;   // Clear __interrupt flag
+        logic2.clear();
     }
-
-
 }
 
 
