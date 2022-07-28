@@ -18,11 +18,11 @@ void hardware_setup();
 void main(void)
 {
     hardware_setup();
-    page0.par.loadDefaults();
+    //page0.par.loadDefaults();
 
     while(true)
     {
-        page0.refresh();
+        //page0.refresh();
     }
 }
 
@@ -42,10 +42,12 @@ void hardware_setup()
     PWM::setup();
     ADC::setup();
     SCI::setup();
+    Encoder::setup();
 
     CLA_start();
     PWM::start();
     ADC::start();
     SCI::start();
+    Encoder::start();
     EnableInterrupts();
 }

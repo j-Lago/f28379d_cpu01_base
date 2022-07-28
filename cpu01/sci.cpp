@@ -95,6 +95,11 @@ void SCI::push(const char* str)
         fifo_tx.push(str[k++]);
 }
 
+void SCI::push(char c)
+{
+        fifo_tx.push(c);
+}
+
 void SCI::dump()
 {
     while (fifo_tx.len > 0){
@@ -127,7 +132,7 @@ interrupt void sciaRxFifoIsr(void)
         }
         else
             if(last_char != 0xff)
-                page0.decodeMessage(s16_rx);
+                //page0.decodeMessage(s16_rx);
 
         last_char = c;
     }

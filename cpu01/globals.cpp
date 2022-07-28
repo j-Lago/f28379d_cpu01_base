@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "F28x_Project.h"
 #include "adc.h"
+#include "encoder.h"
 #include "pwm.h"
 
 
@@ -20,8 +21,10 @@ OutPin logic1(19, active_high);
 OutPin logic2(18, active_high);
 OutPin logic3(67, active_high);
 
-NextionP0 page0;
+//NextionP0 page0;
+RaspberryPi::Comm raspi;
+
 ADC& adc = ADC::getInstance();
 PWM& pwm = PWM::getInstance();
-
+Encoder& enc = Encoder::getInstance();
 

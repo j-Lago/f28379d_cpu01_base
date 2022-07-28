@@ -13,6 +13,12 @@
 #include "cla.h"
 #include "adc.h"
 
+int comm_downsampling_count = 0;
+const int comm_downsample_rate = 20; // monitora a 20k/20 = 1 kHz (envia até 17 bytes a 500 kbps)
+
+int enc_downsampling_count = 0;
+const int enc_downsample_rate = 10; // monitora a 20k/20 = 1 kHz (envia até 17 bytes a 500 kbps)
+
 // Interrupção de final de conversão do ADC
 interrupt void adca1_isr(void)
 {
@@ -27,6 +33,8 @@ interrupt void adca1_isr(void)
         pwm.clear();
 
     adc.read(); // aplica ganhos e offsets nas medições
+    enc.calc(); // altualiza em frequencia fs/enc.downsample
+
 
 
     //
@@ -49,10 +57,41 @@ interrupt void adca1_isr(void)
 
     pwm.setComps(cla_abc);
 
+    comm_downsampling_count = (++comm_downsampling_count) % comm_downsample_rate;
+    if( comm_downsampling_count == 0){
+        //raspi.send('0'); logic2.clear(); logic2.set();
+        //raspi.send('1'); logic2.clear(); logic2.set();
+        //raspi.send('2'); logic2.clear(); logic2.set();
+        //raspi.send('3'); logic2.clear(); logic2.set();
+        //raspi.send('4'); logic2.clear(); logic2.set();
+        //raspi.send('5'); logic2.clear(); logic2.set();
+        //raspi.send('6'); logic2.clear(); logic2.set();
+        //raspi.send('7'); logic2.clear(); logic2.set();
+        //raspi.port.dump(); logic2.clear(); logic2.set();
+        while(ScicRegs.SCIFFTX.bit.TXFFST != 0); // aguarda esvaziar buffer de envio
+                ScicRegs.SCITXBUF.all = '0';
+                ScicRegs.SCITXBUF.all = '1';
+                ScicRegs.SCITXBUF.all = '2';
+                ScicRegs.SCITXBUF.all = '3';
+                ScicRegs.SCITXBUF.all = '4';
+                ScicRegs.SCITXBUF.all = '5';
+                ScicRegs.SCITXBUF.all = '6';
+                ScicRegs.SCITXBUF.all = '7';
+                ScicRegs.SCITXBUF.all = '8';
+                ScicRegs.SCITXBUF.all = '9';
+                ScicRegs.SCITXBUF.all = 'a';
+                //ScicRegs.SCITXBUF.all = 'b';
+                //ScicRegs.SCITXBUF.all = 'c';
+                //ScicRegs.SCITXBUF.all = 'd';
+                //ScicRegs.SCITXBUF.all = 'e';
+                //ScicRegs.SCITXBUF.all = 'f';
+                //ScicRegs.SCITXBUF.all = 'g';
+    }
+
     if(refresh_count++ >= REFRESH_COMP){
         led_az.toggle();
         refresh_count = 0;
-        page0.periodic_refresh();
+        //page0.periodic_refresh();
     }
 
 
