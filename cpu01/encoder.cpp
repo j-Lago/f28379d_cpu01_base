@@ -5,7 +5,6 @@
  *      Author: j-Lago
  */
 
-
 /*
  * sci.cpp
  *
