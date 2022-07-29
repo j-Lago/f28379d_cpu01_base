@@ -15,12 +15,10 @@
 
 namespace RaspberryPi
 {
-
-    // classe base. Não deve ser instanciada.
     class Comm
     {
     public:
-        static const char* EOM; // End of Message: nextion messages ends with three 0xff characters
+        static const char* EOM; // End of Message characters
         static SCI& port;   // pointer to SCI (UART) object
 
     public:
@@ -28,10 +26,4 @@ namespace RaspberryPi
         void send(const char *str);
     };
 
-
 };
-
-
-
-
-

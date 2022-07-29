@@ -33,7 +33,7 @@ interrupt void adca1_isr(void)
         pwm.clear();
 
     adc.read(); // aplica ganhos e offsets nas medições
-    enc.calc(); // altualiza em frequencia fs/enc.downsample
+    enc.update_vel(); // altualiza em frequencia fs/enc.downsample
 
 
 
