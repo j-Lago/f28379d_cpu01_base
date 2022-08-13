@@ -5,101 +5,14 @@
  *      Author: j-Lago
  */
 
-
-
 #include "F28x_Project.h"
+#include <stdint.h>
 #include "globals.h"
 #include "pwm.h"
 #include "cla.h"
 #include "adc.h"
 
-int comm_downsampling_count = 0;
-const int comm_downsample_rate = 20; // monitora a 20k/20 = 1 kHz (envia até 17 bytes a 500 kbps)
 
-int enc_downsampling_count = 0;
-const int enc_downsample_rate = 10; // monitora a 20k/20 = 1 kHz (envia até 17 bytes a 500 kbps)
-
-// Interrupção de final de conversão do ADC
-interrupt void adca1_isr(void)
-{
-    static uint32_t refresh_count = REFRESH_COMP;
-
-    //logic2.set();
-
-    // logica para ligar, desligar e clear pelo debuger
-    if(pwm.en)
-        pwm.enable();
-    else if(!pwm.fault)
-        pwm.clear();
-
-    adc.read(); // aplica ganhos e offsets nas medições
-    enc.update_vel(); // altualiza em frequencia fs/enc.downsample
-
-
-
-    //
-    // aqui vai o código que CPU1 escreve nas variáveis compartilhadas com CLA (dados enviados para o CLA)
-    //
-    if(pwm.en)
-    {
-        Cla1ForceTask1(); // dispara task 1 do CLA
-        //
-        // aqui vai o código que CPU1 executa que independe do resultado dos cálculos do CLA task1 (execução CPU e CLA em paralelo)
-        //
-
-        while(Cla1Regs.MIRUN.bit.INT1 == 1); // aguarda até CLA task 1 finalizar. Alternativamente, pode-se habilitar em CLA_setup() uma interrupção para esse evento
-        // ... while(Cla1Regs.MIRUN.bit.INT8 == 1); // aguarda até CLA task 8 finalizar
-
-        //
-        // aqui vai o código que CPU1 executa que depende do resultado dos cálculos do CLA
-        //
-    }
-
-    pwm.setComps(cla_abc);
-
-    comm_downsampling_count = (++comm_downsampling_count) % comm_downsample_rate;
-    if( comm_downsampling_count == 0){
-        //raspi.send('0'); logic2.clear(); logic2.set();
-        //raspi.send('1'); logic2.clear(); logic2.set();
-        //raspi.send('2'); logic2.clear(); logic2.set();
-        //raspi.send('3'); logic2.clear(); logic2.set();
-        //raspi.send('4'); logic2.clear(); logic2.set();
-        //raspi.send('5'); logic2.clear(); logic2.set();
-        //raspi.send('6'); logic2.clear(); logic2.set();
-        //raspi.send('7'); logic2.clear(); logic2.set();
-        //raspi.port.dump(); logic2.clear(); logic2.set();
-        while(ScicRegs.SCIFFTX.bit.TXFFST != 0); // aguarda esvaziar buffer de envio
-                ScicRegs.SCITXBUF.all = '0';
-                ScicRegs.SCITXBUF.all = '1';
-                ScicRegs.SCITXBUF.all = '2';
-                ScicRegs.SCITXBUF.all = '3';
-                ScicRegs.SCITXBUF.all = '4';
-                ScicRegs.SCITXBUF.all = '5';
-                ScicRegs.SCITXBUF.all = '6';
-                ScicRegs.SCITXBUF.all = '7';
-                ScicRegs.SCITXBUF.all = '8';
-                ScicRegs.SCITXBUF.all = '9';
-                ScicRegs.SCITXBUF.all = 'a';
-                //ScicRegs.SCITXBUF.all = 'b';
-                //ScicRegs.SCITXBUF.all = 'c';
-                //ScicRegs.SCITXBUF.all = 'd';
-                //ScicRegs.SCITXBUF.all = 'e';
-                //ScicRegs.SCITXBUF.all = 'f';
-                //ScicRegs.SCITXBUF.all = 'g';
-    }
-
-    if(refresh_count++ >= REFRESH_COMP){
-        led_az.toggle();
-        refresh_count = 0;
-        //page0.periodic_refresh();
-    }
-
-
-    //logic2.clear();
-
-    AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
-    PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
-}
 
 //
 // Interrupção chamada quando conversão do ADCA excecer limite predefinido em OVERCURRENT
@@ -161,7 +74,7 @@ void ADC::setup()
 
     EALLOW;
 
-    PieVectTable.ADCA1_INT = &adca1_isr; // mapeia a função a ser chamada pela interrupção do ADCA
+    PieVectTable.ADCA1_INT = &main_adc_isr; // mapeia a função a ser chamada pela interrupção do ADCA
     PieVectTable.ADCA_EVT_INT = &adca_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCa - iu)
     PieVectTable.ADCB_EVT_INT = &adcb_ppb_isr; // mapeia a função a ser chamada pela interrupção do PPB (limites ADCb - iv)
 
