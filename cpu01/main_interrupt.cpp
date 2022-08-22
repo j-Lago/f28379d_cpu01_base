@@ -19,7 +19,7 @@ uint16_t teste_count = 0;
 interrupt void main_adc_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
-    static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
+    //static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
 
 logic1.set(); // todo: temporario para medição de tempo
 
@@ -55,10 +55,8 @@ logic1.set(); // todo: temporario para medição de tempo
     pwm.setComps(cla_abc);
 
 
-    if(++comm_downsampling_count >= COMM_REFRESH_COMP){
+    /*if(++comm_downsampling_count >= COMM_REFRESH_COMP){
         comm_downsampling_count = 0;
-
-logic3.set();  // todo: temporario para medição de tempo
 
         switch(teste_count)
         {
@@ -69,8 +67,7 @@ logic3.set();  // todo: temporario para medição de tempo
         break;  case 4: raspi.unsafe_write_int32(i32teste, 3, 85);
         }
         teste_count = (++teste_count) % 5;
-    }
-logic3.clear();  // todo: temporario para medição de tempo
+    }*/
 
     if(refresh_count++ >= REFRESH_COMP){
         led_az.toggle();
