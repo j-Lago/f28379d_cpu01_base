@@ -42,10 +42,12 @@ void hardware_setup()
     PWM::setup();
     ADC::setup();
     SCI::setup();
+    Encoder::setup();
 
     CLA_start();
     PWM::start();
     ADC::start();
     SCI::start();
+    Encoder::start();
     EnableInterrupts();
 }

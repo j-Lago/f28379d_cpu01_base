@@ -8,11 +8,12 @@
 #pragma once
 
 
+
 enum ADCresolution {bits12=0, bits16=1};
 enum ADCsignalmode {single=0, differential=1};
 
 
-interrupt void adca1_isr(void);
+interrupt void main_adc_isr(void);
 interrupt void adca_ppb_isr(void);
 interrupt void adcb_ppb_isr(void);
 

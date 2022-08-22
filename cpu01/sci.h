@@ -59,8 +59,8 @@ interrupt void sciaTxFifoIsr(void);
 class SCI
 {
 public:
-    static const uint32_t BAUD_RATE = 250000; // ~250 kbps
-    static const uint16_t FIFO_TX_SIZE = 256;
+    static const uint32_t BAUD_RATE = 500000; //500000;
+    static const uint16_t FIFO_TX_SIZE = 1024;
 
     FIFO<char, FIFO_TX_SIZE> fifo_tx;
 
@@ -70,7 +70,11 @@ public:
     void push(const fixed_string<16>& s16);
     void push(const fixed_string<32>& s32);
     void push(const char* str);
+    void push(char c);
     void dump(void);
+    void unsafe_dump(void);
+
+    void send(char c);
 
 //singleton
 private:
