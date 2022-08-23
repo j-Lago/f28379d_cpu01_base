@@ -13,16 +13,17 @@
 #include "adc.h"
 
 
-
 //
 // Interrupção chamada quando conversão do ADCA excecer limite predefinido em OVERCURRENT
 //
 interrupt void adca_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
-    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
-
+#ifndef DISABLE_PROTECTIONS
+    pwm.trip(); //trip: hardware
+#endif
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - adc.offset[0]) * adc.gain[0];
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - adc.offset[1]) * adc.gain[1];
+    adc.vdc_over = (AdccResultRegs.ADCRESULT3 - adc.offset[6]) * adc.gain[6] + (AdcbResultRegs.ADCRESULT3 - adc.offset[7]) * adc.gain[7];
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
 
@@ -34,9 +35,12 @@ interrupt void adca_ppb_isr(void)
 //
 interrupt void adcb_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
-    adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
+#ifndef DISABLE_PROTECTIONS
+    pwm.trip(); //trip: hardware
+#endif
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - adc.offset[0]) * adc.gain[0];
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - adc.offset[1]) * adc.gain[1];
+    adc.vdc_over = (AdccResultRegs.ADCRESULT3 - adc.offset[6]) * adc.gain[6] + (AdcbResultRegs.ADCRESULT3 - adc.offset[7]) * adc.gain[7];
 
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
@@ -46,24 +50,25 @@ interrupt void adcb_ppb_isr(void)
 
 void ADC::read()
 {
-    iu =  (AdcaResultRegs.ADCRESULT0 - 1900) * km_iuvw;     // iu  -> pino 26
-    iv =  (AdcbResultRegs.ADCRESULT0 - 2036) * km_iuvw;     // iv  -> pino 25
+    iu =  (AdcaResultRegs.ADCRESULT0 - offset[0]) * gain[0];      // iu  -> pino 26
+    iv =  (AdcbResultRegs.ADCRESULT0 - offset[1]) * gain[1];      // iv  -> pino 25
 
-    vp0 = (AdccResultRegs.ADCRESULT3 - 0) * km_vdc;         // vp0 -> pino 24
-    v0n = (AdcbResultRegs.ADCRESULT3 - 0) * km_vdc;         // v0n -> pino 23
+    ic =  -(AdcaResultRegs.ADCRESULT1 - offset[2]) * gain[2];     // ic  -> pino 29
+    ib =  -(AdccResultRegs.ADCRESULT1 - offset[3]) * gain[3];     // ib  -> pino 64
 
-    vrs = (AdcbResultRegs.ADCRESULT2 - 1939) * km_vrst;      // vrs -> pino 28
-    vts = (AdccResultRegs.ADCRESULT2 - 1945) * km_vrst;      // vts -> pino 27
+    vrs = (AdcbResultRegs.ADCRESULT2 - offset[4]) * gain[4];      // vrs -> pino 28
+    vts = (AdccResultRegs.ADCRESULT2 - offset[5]) * gain[5];      // vts -> pino 27
 
-    ic =  -(AdcaResultRegs.ADCRESULT1 - 2035) * km_iabc;    // ic  -> pino 29
-    ib =  -(AdccResultRegs.ADCRESULT1 - 2035) * km_iabc;    // ib  -> pino 64
+    vp0 = (AdccResultRegs.ADCRESULT3 - offset[6]) * gain[6];      // vp0 -> pino 24
+    v0n = (AdcbResultRegs.ADCRESULT3 - offset[7]) * gain[7];      // v0n -> pino 23
 
-    //vrsf = (AdccResultRegs.ADCRESULT5 - 2048) * km_vac;    // vrs2 -> pino 67
-    //vtsf = (AdcaResultRegs.ADCRESULT5 - 2048) * km_vac;    // vts2 -> pino 66
-    //icf =  (AdcaResultRegs.ADCRESULT4 - 2048) * km_iabc;   // ic2  -> pino 63
-    //ibf =  (AdcbResultRegs.ADCRESULT4 - 2048) * km_iabc;   // ib2  -> pino 65
+    icf =  (AdcaResultRegs.ADCRESULT4 - offset[8]) * gain[8];     // ic2  -> pino 63
+    ibf =  (AdcbResultRegs.ADCRESULT4 - offset[9]) * gain[9];     // ib2  -> pino 65
 
-    pot = AdcaResultRegs.ADCRESULT6; // DAC_A(JA3) -> pino 30
+    vrsf = (AdccResultRegs.ADCRESULT5 - offset[10]) * gain[10];   // vrs2 -> pino 67
+    vtsf = (AdcaResultRegs.ADCRESULT5 - offset[11]) * gain[11];   // vts2 -> pino 66
+
+    pot = (AdcaResultRegs.ADCRESULT6 - offset[12]) * gain[12];    // DAC_A(JA3) -> pino 30
 
     vdc = vp0+v0n;
 }
@@ -417,19 +422,8 @@ ADC ADC::instance;
 ADC& ADC::getInstance(){ return instance; }
 ADC::ADC()
 {
-    iu = 0.f;
-    iv = 0.f;
-    vp0 = 0.f;
-    v0n = 0.f;
-    vrs = 0.f;
-    vts = 0.f;
-    ic = 0.f;
-    ib = 0.f;
-    vrsf = 0.f;
-    vtsf = 0.f;
-    icf = 0.f;
-    ibf = 0.f;
-    pot = 0.f;
+    for(int k=0; k < Nmeasurs; k++)
+        measurs[k] = 0.0f;
 }
 
 

@@ -173,7 +173,7 @@ class CiS
         using namespace fast_math;
         bool sign_sin = (this->m_sin<0)? 0 : 1;
         bool sign_cos = (this->m_cos<0)? 0 : 1;
-        if (abs(this->m_sin) <= abs(this->m_cos))  // melhor m�todo (arcsin ou arccos) � o de menor valor entre sin ou cos
+        if (abs(this->m_sin) <= abs(this->m_cos))  // melhor método (arcsin ou arccos) � o de menor valor entre sin ou cos
         {
             if(sign_cos)
                 m_rad = fast_asin(this->m_sin);

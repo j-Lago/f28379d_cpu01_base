@@ -14,21 +14,33 @@ interrupt void main_adc_isr(void)
     static uint32_t refresh_count = REFRESH_COMP;
     //static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
 
-logic0.set(); // todo: temporario para medição de tempo
+logic0.set(); // probe: logic0: medicao de tempo interrupcao adc
 
     // logica para ligar, desligar e clear pelo debuger
     if(pwm.en)
         pwm.enable();
-    else if(!pwm.fault)
+    else if(!pwm.fault){
         prot.clear();
+    }
+
+    if(pwm.fault)
+        logic2.set(); // probe: logic2: estado sinal de falta
+    else
+        logic2.clear(); // probe: logic2: estado sinal de falta
+
+
 
     //enc.update_vel(); // altualiza em frequencia fs/enc.downsample
     adc.read(); // aplica ganhos e offsets nas medições
-    prot.test();
 
-logic1.set(); // todo: temporario para medição de tempo
+#ifndef DISABLE_PROTECTIONS
+    prot.test(); //trip: software
+#endif
+
+
+logic1.set(); // probe: logic1: medicao de tempo controle
     controle();
-logic1.clear(); // todo: temporario para medição de tempo
+logic1.clear(); // probe: logic1: medicao de tempo controle
 
     /*
     //
@@ -73,7 +85,7 @@ logic1.clear(); // todo: temporario para medição de tempo
     }
 
 
-logic0.clear();  // todo: temporario para medição de tempo
+logic0.clear();  // probe: logic0: medicao de tempo interrupcao adc
 
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1; //clear INT1 flag
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;

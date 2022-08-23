@@ -143,9 +143,9 @@ void controle(void){
 
     //-------------------------------------------------------------------------------------------------
     //Desconsiderando as componentes de seq0:
-    vg[0] = -1.0/3.0*adc.vts + 2.0/3.0*adc.vrs;
-    vg[1] = -1.0/3.0*adc.vts - 1.0/3.0*adc.vrs;
-    vg[2] =  2.0/3.0*adc.vts - 1.0/3.0*adc.vrs;
+    vg[0] = -1.0f/3.0f*adc.vts + 2.0/3.0*adc.vrs;
+    vg[1] = -1.0f/3.0f*adc.vts - 1.0/3.0*adc.vrs;
+    vg[2] =  2.0f/3.0f*adc.vts - 1.0/3.0*adc.vrs;
 
     //SOGI
     for(int i=0; i<3; i++){

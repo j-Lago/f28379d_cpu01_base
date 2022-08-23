@@ -7,6 +7,7 @@
 
 #include "F28x_Project.h"
 #include "pwm.h"
+#include "globals.h"
 
 
 void PWM::setComps(float a, float b, float c)
@@ -79,6 +80,8 @@ void PWM::clear()
 {
     disable();
     fault = false;
+    logic3.set(); // probe: logic3: reset da falta
+    logic3.clear(); // probe: logic3: reset da falta
 }
 
 void PWM::setup(void)
@@ -228,7 +231,7 @@ void PWM::setup(void)
 
 
 
-    //TRIP
+    // trip
     EALLOW;
     EPwm1Regs.TZFRC.bit.OST = 1;
     EPwm2Regs.TZFRC.bit.OST = 1;
