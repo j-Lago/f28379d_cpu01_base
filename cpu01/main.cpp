@@ -13,6 +13,7 @@
 #include "cla.h"
 #include "parameters.h"
 
+
 void hardware_setup();
 
 void main(void)
@@ -20,8 +21,7 @@ void main(void)
     hardware_setup();
     page0.par.loadDefaults();
 
-    while(true)
-    {
+    while(true){
         page0.refresh();
     }
 }

@@ -19,8 +19,8 @@
 //
 interrupt void adca_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
     adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1;
@@ -34,8 +34,8 @@ interrupt void adca_ppb_isr(void)
 //
 interrupt void adcb_ppb_isr(void)
 {
-    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
-    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_i;
+    adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
+    adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*ADC::km_iuvw;
     adc.vdc_over = (AdccResultRegs.ADCRESULT3 + AdcbResultRegs.ADCRESULT3) * ADC::km_vdc;
 
     AdcbRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1;
@@ -46,25 +46,28 @@ interrupt void adcb_ppb_isr(void)
 
 void ADC::read()
 {
-    iu =  (AdcaResultRegs.ADCRESULT0 - 2047.5)*km_i;        // iu  -> pino 26
-    iv =  (AdcbResultRegs.ADCRESULT0 - 2047.5)*km_i;        // iv  -> pino 25
-    vp0 = AdccResultRegs.ADCRESULT3 * km_vdc;               // vp0 -> pino 24
-    v0n = AdcbResultRegs.ADCRESULT3 * km_vdc;               // v0n -> pino 23
+    iu =  (AdcaResultRegs.ADCRESULT0 - 1900) * km_iuvw;     // iu  -> pino 26
+    iv =  (AdcbResultRegs.ADCRESULT0 - 2036) * km_iuvw;     // iv  -> pino 25
 
-    vrs = (AdcbResultRegs.ADCRESULT2 - 2047.5) * km_vac;    // vrs -> pino 28
-    vts = (AdccResultRegs.ADCRESULT2 - 2047.5) * km_vac;    // vts -> pino 27
-    ic =  (AdcaResultRegs.ADCRESULT1 - 2047.5) * km_i;      // ic  -> pino 29
-    ib =  (AdccResultRegs.ADCRESULT1 - 2047.5) * km_i;      // ib  -> pino 64
+    vp0 = (AdccResultRegs.ADCRESULT3 - 0) * km_vdc;         // vp0 -> pino 24
+    v0n = (AdcbResultRegs.ADCRESULT3 - 0) * km_vdc;         // v0n -> pino 23
 
-    vrsf = (AdccResultRegs.ADCRESULT5 - 2047.5) * km_vac;    // vrs2 -> pino 67
-    vtsf = (AdcaResultRegs.ADCRESULT5 - 2047.5) * km_vac;    // vts2 -> pino 66
-    icf =  (AdcaResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ic2  -> pino 63
-    ibf =  (AdcbResultRegs.ADCRESULT4 - 2047.5) * km_i;      // ib2  -> pino 65
+    vrs = (AdcbResultRegs.ADCRESULT2 - 1939) * km_vrst;      // vrs -> pino 28
+    vts = (AdccResultRegs.ADCRESULT2 - 1945) * km_vrst;      // vts -> pino 27
 
-    pot = AdcaResultRegs.ADCRESULT6 * (float)km_DC * 100.0f; // DAC_A(JA3) -> pino 30
+    ic =  -(AdcaResultRegs.ADCRESULT1 - 2035) * km_iabc;    // ic  -> pino 29
+    ib =  -(AdccResultRegs.ADCRESULT1 - 2035) * km_iabc;    // ib  -> pino 64
+
+    //vrsf = (AdccResultRegs.ADCRESULT5 - 2048) * km_vac;    // vrs2 -> pino 67
+    //vtsf = (AdcaResultRegs.ADCRESULT5 - 2048) * km_vac;    // vts2 -> pino 66
+    //icf =  (AdcaResultRegs.ADCRESULT4 - 2048) * km_iabc;   // ic2  -> pino 63
+    //ibf =  (AdcbResultRegs.ADCRESULT4 - 2048) * km_iabc;   // ib2  -> pino 65
+
+    pot = AdcaResultRegs.ADCRESULT6; // DAC_A(JA3) -> pino 30
 
     vdc = vp0+v0n;
 }
+
 
 void ADC::setup()
 {
@@ -339,6 +342,7 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
         break;
     }
 }
+
 
 void ADC::CalAdcINL(Uint16 adc)
 {

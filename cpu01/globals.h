@@ -12,6 +12,7 @@
 #include "adc.h"
 #include "encoder.h"
 #include "pwm.h"
+#include "protecao.h"
 //#include "raspberrypi.h"
 
 #define REFRESH_COMP 5000 // 20k/5k = 4 Hz (frequencia de atualização da hmi nextion e led)
@@ -19,7 +20,8 @@
 
 extern OutPin led_vm;
 extern OutPin led_az;
-//extern OutPin logic0;
+
+extern OutPin logic0;
 extern OutPin logic1;
 //extern OutPin logic2;
 //extern OutPin logic3;
@@ -30,3 +32,5 @@ extern NextionP0 page0;
 extern ADC& adc;
 extern PWM& pwm;
 extern Encoder& enc;
+
+extern Protecao prot;

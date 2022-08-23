@@ -13,7 +13,6 @@
  */
 
 
-
 #include "F28x_Project.h"
 #include <stdio.h>
 #include "globals.h"

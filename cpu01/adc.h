@@ -19,17 +19,17 @@ interrupt void adcb_ppb_isr(void);
 
 struct ADC
 {
+    // limite das proteções de conversão do ADC. Os limites definidos por software estão em proteções.h
     static const float OVERCURRENT = 12.0f;
-    static const float FUNDOESCALA_I = 20.0f;
-    static const float FUNDOESCALA_VAC = 400.0f;
-    static const float FUNDOESCALA_VDC = 20.0f;
+
+    static const float km_iuvw = 0.006171422365f;
+    static const float km_vdc = 0.08775538f;
+    static const float km_vrst = 0.336042171336f;
+    static const float km_iabc = 0.012085702131f;
+
+    static const float FUNDOESCALA_I = 2047.5f * km_iuvw;
     static const int LIMITHI_OVERCURRENT =  (int) ((1 + OVERCURRENT/FUNDOESCALA_I)*2047.5f);
     static const int LIMITLO_OVERCURRENT =  (int) ((1 - OVERCURRENT/FUNDOESCALA_I)*2047.5f);
-    static const double km_DC = 0.00024420024420024420024f;  // 1 / 2^12
-    static const double km_AC = 0.00048840048840048840048f;  // 1 / 2^11
-    static const float km_i = FUNDOESCALA_I * km_AC;
-    static const float km_vdc = FUNDOESCALA_VDC * km_DC;
-    static const float km_vac = FUNDOESCALA_VAC * km_AC;
 
     float iu;
     float iv;
