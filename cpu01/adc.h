@@ -6,6 +6,12 @@
  */
 
 #pragma once
+#include "F28x_Project.h"
+#include <stdint.h>
+
+#include "pwm.h"
+#include "cla.h"
+
 
 #define Nmeasurs 13
 
@@ -25,8 +31,10 @@ public:
     static const float offset[Nmeasurs];    // definido em consts.cpp
     static const float gain[Nmeasurs];      // definido em consts.cpp
 
-    static const int LIMITHI_OVERCURRENT =  4086;
-    static const int LIMITLO_OVERCURRENT =  10;
+    static const int LIMITHI_OVERCURRENTu;  // definido em consts.cpp
+    static const int LIMITLO_OVERCURRENTu;  // definido em consts.cpp
+    static const int LIMITHI_OVERCURRENTv;  // definido em consts.cpp
+    static const int LIMITLO_OVERCURRENTv;  // definido em consts.cpp
 
     union
     {

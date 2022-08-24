@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include "F28x_Project.h"
 
 /*
  * SI3fPWM provê as configurações do hardware e métodos auxiliares para implementação de um modulador PWM para um VSI trifásico.

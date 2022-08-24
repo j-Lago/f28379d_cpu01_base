@@ -5,11 +5,10 @@
  *      Author: j-Lago
  */
 
-#include "F28x_Project.h"
-#include <stdint.h>
 #include "adc.h"
 #include "protecao.h"
 
+// ganhos canais de medição ADC
 const float ADC::offset[]  = {1899.4f, //iu
                               2036.4f, //iv
                               2047.5f, //ic
@@ -25,6 +24,7 @@ const float ADC::offset[]  = {1899.4f, //iu
                               0.0f     //pot
                               };
 
+// ofsset canais de medição ADC
 const float ADC::gain[] = {0.006171422365f, //iu
                            0.006171422365f, //iv
                            0.0f,            //ic
@@ -40,6 +40,7 @@ const float ADC::gain[] = {0.006171422365f, //iu
                            0.000244200244f  //pot
                            };
 
+// limite para proteção por software para cada canal de medição ADC
 const float Protecao::limits[] = {8.0f,     //iu
                                   8.0f,     //iv
                                   0.0f,     //ic
@@ -55,4 +56,9 @@ const float Protecao::limits[] = {8.0f,     //iu
                                   1.0f      //pot
                                   };
 
+// limite para proteção por hardware de sobrecorrente iu e iv (10 % acima da proteção por software)
+const int ADC::LIMITHI_OVERCURRENTu =  ADC::offset[0]  + (Protecao::limits[0] / ADC::gain[0]) * 1.1f;
+const int ADC::LIMITLO_OVERCURRENTu =  ADC::offset[0]  - (Protecao::limits[0] / ADC::gain[0]) * 1.1f;
+const int ADC::LIMITHI_OVERCURRENTv =  ADC::offset[1]  + (Protecao::limits[1] / ADC::gain[1]) * 1.1f;
+const int ADC::LIMITLO_OVERCURRENTv =  ADC::offset[1]  - (Protecao::limits[1] / ADC::gain[1]) * 1.1f;
 

@@ -17,10 +17,9 @@
 OutPin led_vm(34, active_low);
 OutPin led_az(31, active_low);
 
-OutPin logic0(32, active_high);
-OutPin logic1(19, active_high);
-OutPin logic2(18, active_high);
-OutPin logic3(67, active_high);
+#ifdef ENABLE_PROBES
+OutPin probe_pins[] = {32, 19, 18, 67};
+#endif
 
 NextionP0 page0;
 //rPiComm::Comm raspi;

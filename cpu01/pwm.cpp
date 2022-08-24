@@ -5,7 +5,6 @@
  *      Author: j-Lago
  */
 
-#include "F28x_Project.h"
 #include "pwm.h"
 #include "globals.h"
 
@@ -80,8 +79,6 @@ void PWM::clear()
 {
     disable();
     fault = false;
-    logic3.set(); // probe: logic3: reset da falta
-    logic3.clear(); // probe: logic3: reset da falta
 }
 
 void PWM::setup(void)

@@ -5,17 +5,12 @@
  *      Author: j-Lago
  */
 
-#include "F28x_Project.h"
-#include <stdint.h>
-#include "globals.h"
-#include "pwm.h"
-#include "cla.h"
 #include "adc.h"
+#include "globals.h"
 
-
-//
-// Interrupção chamada quando conversão do ADCA excecer limite predefinido em OVERCURRENT
-//
+/*
+ * Interrupção chamada quando conversão do ADCA (iu) excecer limite predefinido em OVERCURRENT
+ */
 interrupt void adca_ppb_isr(void)
 {
 #ifndef DISABLE_PROTECTIONS
@@ -29,10 +24,9 @@ interrupt void adca_ppb_isr(void)
 
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP10;
 }
-
-//
-// Interrupção chamada quando conversão do ADCB excecer limite predefinido em OVERCURRENT
-//
+/*
+ * Interrupção chamada quando conversão do ADCB (iv) excecer limite predefinido em OVERCURRENT
+ */
 interrupt void adcb_ppb_isr(void)
 {
 #ifndef DISABLE_PROTECTIONS
@@ -48,6 +42,9 @@ interrupt void adcb_ppb_isr(void)
     PieCtrlRegs.PIEACK.all = PIEACK_GROUP10;
 }
 
+/*
+ * tira offset e aplica ganho
+ */
 void ADC::read()
 {
     iu =  (AdcaResultRegs.ADCRESULT0 - offset[0]) * gain[0];      // iu  -> pino 26
@@ -106,12 +103,10 @@ void ADC::setup()
 
 
     Uint16 acqps;
-    //
     //determine minimum acquisition window (in SYSCLKS) based on resolution
-    //
     if(ADC_RESOLUTION_12BIT == AdcaRegs.ADCCTL2.bit.RESOLUTION)
     {
-        acqps = 14; //7;//14; //75ns
+        acqps = 14;  //75ns
     }
     else //resolution is 16-bit
     {
@@ -214,14 +209,23 @@ void ADC::setup()
     AdcaRegs.ADCINTSEL1N2.bit.INT1E = 1;      //enable INT1 flag
     AdcaRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;    //make sure INT1 flag is cleared
 
-    //pos-processamento (sobrecorente)
+    //pos-processamento (sobrecorente iu)
     AdcaRegs.ADCPPB1CONFIG.bit.CONFIG = 0;  //PPB1 is associated with soc0
-    AdcaRegs.ADCPPB1TRIPHI.bit.LIMITHI = LIMITHI_OVERCURRENT;  //set high limits
-    AdcaRegs.ADCPPB1TRIPLO.bit.LIMITLO = LIMITLO_OVERCURRENT;    //set low limits
+    AdcaRegs.ADCPPB1TRIPHI.bit.LIMITHI = LIMITHI_OVERCURRENTu;  //set high limits
+    AdcaRegs.ADCPPB1TRIPLO.bit.LIMITLO = LIMITLO_OVERCURRENTu;    //set low limits
     AdcaRegs.ADCEVTINTSEL.bit.PPB1TRIPHI = 1;  //enable high limit events to generate interrupt
     AdcaRegs.ADCEVTINTSEL.bit.PPB1TRIPLO = 1;  //enable low limit events to generate interrupt
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPHI = 1; // limpa flag high limit
     AdcaRegs.ADCEVTCLR.bit.PPB1TRIPLO = 1; // limpa flag low limit
+
+    //pos-processamento (sobrecorente iv)
+    AdcbRegs.ADCPPB1CONFIG.bit.CONFIG = 0;  //PPB1 is associated with soc0
+    AdcbRegs.ADCPPB1TRIPHI.bit.LIMITHI = LIMITHI_OVERCURRENTv;  //set high limits
+    AdcbRegs.ADCPPB1TRIPLO.bit.LIMITLO = LIMITLO_OVERCURRENTv;    //set low limits
+    AdcbRegs.ADCEVTINTSEL.bit.PPB2TRIPHI = 1;  //enable high limit events to generate interrupt
+    AdcbRegs.ADCEVTINTSEL.bit.PPB2TRIPLO = 1;  //enable low limit events to generate interrupt
+    AdcbRegs.ADCEVTCLR.bit.PPB2TRIPHI = 1; // limpa flag high limit
+    AdcbRegs.ADCEVTCLR.bit.PPB2TRIPLO = 1; // limpa flag low limit
 
 
     // configura disparo SOC
@@ -253,36 +257,26 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
     Uint16 adcOffsetTrimOTPIndex; //index into OTP table of ADC offset trims
     Uint16 adcOffsetTrim;         //temporary ADC offset trim
 
-    //
     //re-populate INL trim
-    //
     CalAdcINL(adc);
 
     if(0xFFFF != *((Uint16*)GetAdcOffsetTrimOTP))
     {
-        //
         //offset trim function is programmed into OTP, so call it
-        //
 
-        //
         //calculate the index into OTP table of offset trims and call
         //function to return the correct offset trim
-        //
         adcOffsetTrimOTPIndex = 4*adc + 2*resolution + 1*signalmode;
         adcOffsetTrim = (*GetAdcOffsetTrimOTP)(adcOffsetTrimOTPIndex);
     }
     else
     {
-        //
         //offset trim function is not populated, so set offset trim to 0
-        //
         adcOffsetTrim = 0;
     }
 
-    //
     //Apply the resolution and signalmode to the specified ADC.
     //Also apply the offset trim and, if needed, linearity trim correction.
-    //
     switch(adc)
     {
         case ADC_ADCA:
@@ -291,9 +285,7 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
             AdcaRegs.ADCOFFTRIM.all = adcOffsetTrim;
             if(ADC_RESOLUTION_12BIT == resolution)
             {
-                //
                 //12-bit linearity trim workaround
-                //
                 AdcaRegs.ADCINLTRIM1 &= 0xFFFF0000;
                 AdcaRegs.ADCINLTRIM2 &= 0xFFFF0000;
                 AdcaRegs.ADCINLTRIM4 &= 0xFFFF0000;
@@ -306,9 +298,7 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
             AdcbRegs.ADCOFFTRIM.all = adcOffsetTrim;
             if(ADC_RESOLUTION_12BIT == resolution)
             {
-                //
                 //12-bit linearity trim workaround
-                //
                 AdcbRegs.ADCINLTRIM1 &= 0xFFFF0000;
                 AdcbRegs.ADCINLTRIM2 &= 0xFFFF0000;
                 AdcbRegs.ADCINLTRIM4 &= 0xFFFF0000;
@@ -321,9 +311,7 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
             AdccRegs.ADCOFFTRIM.all = adcOffsetTrim;
             if(ADC_RESOLUTION_12BIT == resolution)
             {
-                //
                 //12-bit linearity trim workaround
-                //
                 AdccRegs.ADCINLTRIM1 &= 0xFFFF0000;
                 AdccRegs.ADCINLTRIM2 &= 0xFFFF0000;
                 AdccRegs.ADCINLTRIM4 &= 0xFFFF0000;
@@ -336,9 +324,7 @@ void ADC::AdcSetMode(Uint16 adc, Uint16 resolution, Uint16 signalmode)
             AdcdRegs.ADCOFFTRIM.all = adcOffsetTrim;
             if(ADC_RESOLUTION_12BIT == resolution)
             {
-                //
                 //12-bit linearity trim workaround
-                //
                 AdcdRegs.ADCINLTRIM1 &= 0xFFFF0000;
                 AdcdRegs.ADCINLTRIM2 &= 0xFFFF0000;
                 AdcdRegs.ADCINLTRIM4 &= 0xFFFF0000;
@@ -355,63 +341,19 @@ void ADC::CalAdcINL(Uint16 adc)
     {
         case ADC_ADCA:
             if(0xFFFF != *((Uint16*)CalAdcaINL))
-            {
-                //
-                //trim function is programmed into OTP, so call it
-                //
-                (*CalAdcaINL)();
-            }
-            else
-            {
-                //
-                //do nothing, no INL trim function populated
-                //
-            }
+                (*CalAdcaINL)();    //trim function is programmed into OTP, so call it
             break;
         case ADC_ADCB:
             if(0xFFFF != *((Uint16*)CalAdcbINL))
-            {
-                //
-                //trim function is programmed into OTP, so call it
-                //
-                (*CalAdcbINL)();
-            }
-            else
-            {
-                //
-                //do nothing, no INL trim function populated
-                //
-            }
+                (*CalAdcbINL)();    //trim function is programmed into OTP, so call it
             break;
         case ADC_ADCC:
             if(0xFFFF != *((Uint16*)CalAdccINL))
-            {
-                //
-                //trim function is programmed into OTP, so call it
-                //
-                (*CalAdccINL)();
-            }
-            else
-            {
-                //
-                //do nothing, no INL trim function populated
-                //
-            }
+                (*CalAdccINL)();    //trim function is programmed into OTP, so call it
             break;
         case ADC_ADCD:
             if(0xFFFF != *((Uint16*)CalAdcdINL))
-            {
-                //
-                //trim function is programmed into OTP, so call it
-                //
-                (*CalAdcdINL)();
-            }
-            else
-            {
-                //
-                //do nothing, no INL trim function populated
-                //
-            }
+                (*CalAdcdINL)();    //trim function is programmed into OTP, so call it
             break;
     }
 }
