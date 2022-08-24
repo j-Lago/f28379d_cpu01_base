@@ -21,9 +21,17 @@ void OutPin::setup(void)
     }
 }
 
+
 OutPin::OutPin(uint16_t gpio_num, pin_active_logic active_logic)
     :gpio_num(gpio_num), active_logic(active_logic)
 {
+    pin_list[count++] = gpio_num;
+}
+
+void OutPin::appendRegister(uint16_t new_gpio_num, pin_active_logic new_active_logic)
+{
+    gpio_num = new_gpio_num;
+    active_logic = new_active_logic;
     pin_list[count++] = gpio_num;
 }
 

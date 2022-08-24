@@ -25,6 +25,8 @@ public:
     pin_active_logic active_logic;
 
     OutPin(uint16_t gpio_num, pin_active_logic active_logic = active_high);
+    OutPin(){};
+    void appendRegister(uint16_t new_gpio_num, pin_active_logic new_active_logic);
     void set(void);
     void clear(void);
     void toggle(void);

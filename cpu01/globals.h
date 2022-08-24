@@ -14,7 +14,9 @@
 #include "pwm.h"
 #include "protecao.h"
 #include "settings.h"
+#include "softPWM.h"
 //#include "raspberrypi.h"
+
 
 
 
@@ -26,11 +28,18 @@
     #define PROBE_CLEAR(ch)  ;
 #endif
 
+
+
 #define REFRESH_COMP 5000 // 20k/5k = 4 Hz (frequencia de atualização da hmi nextion e led)
 #define COMM_REFRESH_COMP 10   // comunicação a 20k/20 = 1 kHz (envia até 17 bytes a 500 kbps)
 
+
+
+
 extern OutPin led_vm;
 extern OutPin led_az;
+
+extern softPWM fan;
 
 #ifdef ENABLE_PROBES
 extern OutPin probe_pins[];

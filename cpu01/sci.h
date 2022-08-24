@@ -16,13 +16,6 @@
 #include "fixed_string.h"
 
 
-#if CPU_FRQ_200MHZ
- #ifndef CPU_CLOCK
-  #define CPU_CLOCK 200000000
- #endif
-#endif
-
-
 interrupt void sciaRxFifoIsr(void);
 interrupt void sciaTxFifoIsr(void);
 

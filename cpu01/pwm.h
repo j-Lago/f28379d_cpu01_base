@@ -7,6 +7,7 @@
 
 #pragma once
 #include "F28x_Project.h"
+#include "settings.h"
 
 /*
  * SI3fPWM provê as configurações do hardware e métodos auxiliares para implementação de um modulador PWM para um VSI trifásico.
@@ -40,8 +41,10 @@
 class PWM
 {
 private:
+    static const float fsw = 10000.0f;  // frequencia de comutação 10 kHz
+
     static const uint16_t CMP_TEMPO_MORTO = 38; // CMP_TEMPO_MORTO*40ns: 38 -> 1.52us
-    static const uint16_t CMP_PORTADORA = 1250; // 1250 -> 10kHz
+    static const uint16_t CMP_PORTADORA = (uint16_t)(CPU_CLOCK / 16 / fsw);   // = 1250 para 10kHz
 
     static const float GAIN = (float)(CMP_PORTADORA)*0.5f - (float)CMP_TEMPO_MORTO*0.25f;
     static const float BIAS = (float)(CMP_PORTADORA)*0.5f + (float)(CMP_TEMPO_MORTO+1)*0.25f;

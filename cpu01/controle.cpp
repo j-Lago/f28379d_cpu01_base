@@ -32,6 +32,8 @@ static const float K2_PISP = 0.0594f;
 static const float K_SOGI = 0.7f;
 float compseqn = 0.01f;
 
+// velocidade do fan
+float duty = 0.6;
 
 //Vari�veis para o SOGI:
 float v0[] = {0, 0, 0};
@@ -217,6 +219,11 @@ void controle(void){
     m_abc[2] = cp + cn;
 
     pwm.setComps(m_abc);
+
+    if(pwm.en)
+            fan.dutycicle = duty;
+        else
+            fan.dutycicle = 0.0f;
     //-------------------------------------------------------------------------------------------------
 
 

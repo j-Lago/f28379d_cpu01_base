@@ -6,6 +6,7 @@
 #include "adc.h"
 #include "controle.h"
 
+
 /*
  * Interrupção de final de conversão do ADC
  */
@@ -16,19 +17,11 @@ interrupt void main_adc_isr(void)
 
 PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 
-    // logica para ligar, desligar e clear pelo debuger
-    if(pwm.en)
-        pwm.enable();
-    else if(!pwm.fault){
-        prot.clear();
-    }
 
-    if(pwm.fault){
-        PROBE_SET(2); // probe: 2 - estado sinal de falta
-    }
-    else{
-        PROBE_CLEAR(2); // probe: 2 - estado sinal de falta
-    }
+    if(pwm.en) // logica para ligar, desligar e clear pelo debuger
+        pwm.enable();
+    else if(!pwm.fault)
+        prot.clear();
 
 
 
@@ -43,6 +36,7 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 PROBE_SET(1);   // probe: 1 - medicao de tempo controle
     controle();
 PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
+
 
     /*
     //
@@ -79,6 +73,8 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
         teste_count = (++teste_count) % 5;
     }
     */
+
+    fan.refresh();
 
     if(refresh_count++ >= REFRESH_COMP){
         led_az.toggle();
