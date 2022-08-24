@@ -36,7 +36,7 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
     adc.read(); // aplica ganhos e offsets nas medições
 
 #ifndef DISABLE_PROTECTIONS
-    prot.test(); //trip: software
+    prot.compare(); //trip: software
 #endif
 
 
