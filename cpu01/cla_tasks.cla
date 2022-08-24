@@ -19,18 +19,18 @@
 __interrupt void Cla1Task1 ( void )
 {
     // modulator angular velocity
-    cla_w = cla_f * PI2;
+    cla_w = cla_f * fcla_PI2;
     if(cla_dir < 0)
         cla_w = -cla_w;
 
     // modulator angle
-    cla_th +=  cla_w * DT;
+    cla_th +=  cla_w * fcla_DT;
 
     // wrap angle to the interval [-pi, pi]
-    if(cla_th > PI)
-        cla_th -= PI2;
-    else if(cla_th < -PI)
-        cla_th += PI2;
+    if(cla_th > fcla_PI)
+        cla_th -= fcla_PI2;
+    else if(cla_th < -fcla_PI)
+        cla_th += fcla_PI2;
 
     // inverse park transform
     float cos = CLAcos(cla_th);

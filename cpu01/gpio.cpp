@@ -12,6 +12,14 @@
 uint16_t OutPin::count = 0;
 uint16_t OutPin::pin_list[OutPin::pin_list_capacity];
 
+OutPin::OutPin(){};
+
+OutPin::OutPin(uint16_t gpio_num, pin_active_logic active_logic)
+    :gpio_num(gpio_num), active_logic(active_logic)
+{
+    pin_list[count++] = gpio_num;
+}
+
 void OutPin::setup(void)
 {
     for(int k=0; k<count; k++)
@@ -19,13 +27,6 @@ void OutPin::setup(void)
         GPIO_SetupPinMux(pin_list[k], GPIO_MUX_CPU1, 0);
         GPIO_SetupPinOptions(pin_list[k], GPIO_OUTPUT, GPIO_PUSHPULL);
     }
-}
-
-
-OutPin::OutPin(uint16_t gpio_num, pin_active_logic active_logic)
-    :gpio_num(gpio_num), active_logic(active_logic)
-{
-    pin_list[count++] = gpio_num;
 }
 
 void OutPin::appendRegister(uint16_t new_gpio_num, pin_active_logic new_active_logic)

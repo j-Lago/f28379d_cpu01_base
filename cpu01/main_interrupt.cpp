@@ -4,7 +4,8 @@
 #include "pwm.h"
 #include "cla.h"
 #include "adc.h"
-#include "controle.h"
+#include "f_controle.h"
+#include "control.h"
 
 
 /*
@@ -33,10 +34,12 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 #endif
 
 
-PROBE_SET(1);   // probe: 1 - medicao de tempo controle
-    controle();
-PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
+
+PROBE_SET(1);   // probe: 1 - medicao de tempo controle
+    pv_control(); //controle original
+    //control(); //nova implementação reorganizada e com desacoplamento
+PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
     /*
     //

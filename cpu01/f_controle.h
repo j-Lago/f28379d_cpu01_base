@@ -7,4 +7,4 @@
 
 #pragma once
 
-void controle(void);
+void pv_control(void);

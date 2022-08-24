@@ -10,7 +10,7 @@
 #include "pwm.h"
 #include "cla.h"
 #include "adc.h"
-#include "controle.h"
+#include "f_controle.h"
 
 //#include "signals.h"
 
@@ -82,7 +82,7 @@ bool zero_cross = false;
 bool semiciclo = false;
 
 
-void controle(void){
+void pv_control(void){
     float sin_th = sin(th);
     float cos_th = cos(th);
 
@@ -96,8 +96,8 @@ void controle(void){
     w = aw+W0;
 
     th = (w + w_)*Ta/2.0 + th_; //Demonstrado na planilha
-    if(th > 2*PI){
-        th -= 2*PI;
+    if(th > 2*fcla_PI){
+        th -= 2*fcla_PI;
         //logic3.set();
     }else{
         //logic3.clear();

@@ -7,9 +7,9 @@
 
 #pragma once
 
-#define DT  0.00005f // 1/fc
-#define PI 3.1415926535897932384626433832795f
-#define PI2 6.283185307179586476925286766559f
+#define fcla_DT  0.00005f // 1/fc
+#define fcla_PI 3.1415926535897932384626433832795f
+#define fcla_PI2 6.283185307179586476925286766559f
 
 extern float cla_dq[2];
 extern float cla_f;

@@ -12,6 +12,7 @@
 #include "adc.h"
 #include "cla.h"
 #include "parameters.h"
+#include "control.h"
 
 
 void hardware_setup();
@@ -43,6 +44,8 @@ void hardware_setup()
     ADC::setup();
     SCI::setup();
     Encoder::setup();
+
+    control_setup();
 
     CLA_start();
     PWM::start();
