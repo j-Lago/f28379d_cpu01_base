@@ -214,8 +214,8 @@ void pv_control(void){
     cn = ((- qn - sqrt3 * dn) * (-sin_th) + (sqrt3 * qn -  dn) * cos_th)*0.5f;
 
 
-    m_abc[1] = ap + an;
-    m_abc[0] = bp + bn;
+    m_abc[0] = ap + an;
+    m_abc[1] = bp + bn;
     m_abc[2] = cp + cn;
 
     pwm.setComps(m_abc);

@@ -30,8 +30,8 @@ void PWM::update()
     if(fault)
         trip();
 
-    EPwm1Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * a + BIAS);
-    EPwm2Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * b + BIAS);
+    EPwm2Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * a + BIAS);
+    EPwm1Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * b + BIAS);
     EPwm3Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * c + BIAS);
 }
 

@@ -122,8 +122,8 @@ void control()
         m_dq_n[1] = pi_i_qn.out + m_dq_n0[1] - w0L * i_dq_n[0];
         transform_dq_albe(m_albe_n, cis_n, m_dq_n);
 
-        m_albe[0] = m_albe_p[0] + m_albe_n[0];
-        m_albe[1] = m_albe_p[1] + m_albe_n[1];
+        m_albe[0] = m_albe_p[0] + m_albe_n[0]*0;
+        m_albe[1] = m_albe_p[1] + m_albe_n[1]*0;
         transform_albe_abc(m_abc, m_albe);
     }
     else
