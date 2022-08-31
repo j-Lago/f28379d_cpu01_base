@@ -8,8 +8,8 @@
 #include "control.h"
 
 volatile float fan_duty = 0.6f; //velocidade do fan
-volatile float i_dq_p_ref [2] = {3.0f, 0.0f}; //refs correntes seq+
-volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
+volatile float i_dq_p_ref[2] = {3.0f, 0.0f}; //refs correntes seq+
+volatile float i_dq_n_ref[2] = {0.0f, 0.0f}; //refs correntes seq-
 volatile float kn = 4.0f;   // ganho compensação seq-
 volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
 
@@ -31,10 +31,12 @@ void control_setup()
     togi_set(&togi_v_be, fa, 1.4f, 0.2f);
     togi_set(&togi_i_al, fa, 1.4f, 0.2f);
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
+
     pi_set(&pi_i_dp, fa, 8.1649f, 0.0072f,  0.0f, 0.0f);
     pi_set(&pi_i_qp, fa, 8.1649f, 0.0072f,  0.0f, 0.0f);
-    pi_set(&pi_i_dn, fa, 4.0f, 0.05f,  0.0f, 0.0f);
-    pi_set(&pi_i_qn, fa, 4.0f, 0.05f,  0.0f, 0.0f);
+    pi_set(&pi_i_dn, fa, 4.0f   , 0.05f  ,  0.0f, 0.0f);
+    pi_set(&pi_i_qn, fa, 4.0f   , 0.05f  ,  0.0f, 0.0f);
+
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
 
 }
@@ -60,8 +62,8 @@ void control()
     float cis[2];   // [cos,  sin]
     float cis_n[2]; // [cos, -sin]
 
-    float m_dq_p0 [2] = {0,0};
-    float m_dq_n0 [2] = {0,0};
+    float m_dq_p0[2] = {0,0};
+    float m_dq_n0[2] = {0,0};
     float m_dq_p[2];
     float m_dq_n[2];
     float m_albe_p[2];
@@ -73,6 +75,7 @@ void control()
     //--Variáveis de entrada-----------------------------------------------------------------------------------
     v_ab[0] = (2.0f * adc.vrs - adc.vts ) *0.33333333333333333f;
     v_ab[1] = -v_ab[0] - ((-adc.vrs+2.0f * adc.vts)*0.33333333333333333f);
+
     i_uv[0] = adc.iu;
     i_uv[1] = adc.iv;
 
@@ -95,7 +98,7 @@ void control()
 
     // tensao de sequência negativa e referência de corrente seq-
     transform_albe_dq(v_dq_n, cis_n, v_albe_n);
-    i_dq_n_ref[0] = kn * v_dq_n[1];
+    i_dq_n_ref[0] =  kn * v_dq_n[1];
     i_dq_n_ref[1] = -kn * v_dq_n[0];
 
     if(pwm.en){
