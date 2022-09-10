@@ -54,7 +54,7 @@ void integrator_step(struct Integrator* self, float input);
  * Eq. diferenças:
  *
  *      y[n] = 5*a[n-3] - 16*a[n-2] + 23*a[n-1]
- *      a[n] = 1 / (12*fa) * ( x[n] - a[n-1] )           , fa = frequência de amostragem
+ *      a[n] = 1 / (12*fa) *  x[n] - a[n-1]           , fa = frequência de amostragem
  *
  */
 struct Integrator3
