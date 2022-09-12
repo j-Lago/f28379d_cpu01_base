@@ -74,9 +74,8 @@ float vqnref = 0.0f; //
 float vdc; //Tens�o no link CC
 bool enn = false;
 bool enp = false; //enn: Liga controle seq- //enp: Liga controle seq+
-
-float m_abc[3] = {0.0f, 0.0f, 0.0f};
-float m_dq[2] = {1.0f, 0.0f};
+float mod_abc[3] = {0.0f, 0.0f, 0.0f};
+float mod_dq[2] = {1.0f, 0.0f};
 
 bool zero_cross = false;
 bool semiciclo = false;
@@ -195,18 +194,18 @@ void pv_control(void){
     //-------------------------------------------------------------------------------------------------
     // atualiza modulador
     if(enp){ //true = manual; false = automatico
-        m_dq[0] = dp;
-        m_dq[1] = qp;
+        mod_dq[0] = dp;
+        mod_dq[1] = qp;
     }else{
-        m_dq[0] = cla_dq[0];
-        m_dq[1] = cla_dq[1];
+        mod_dq[0] = cla_dq[0];
+        mod_dq[1] = cla_dq[1];
     }
 
 
     //Transformada inversa de park seq+:
-    ap = cos_th*m_dq[0]              + sin_th*m_dq[1];
-    bp = (-cos_2+sinsqrt3_2)*m_dq[0] - (sin_2 + cossqrt3_2)*m_dq[1];
-    cp = (-cos_2-sinsqrt3_2)*m_dq[0] + (-sin_2 + cossqrt3_2)*m_dq[1];
+    ap = cos_th*mod_dq[0]              + sin_th*mod_dq[1];
+    bp = (-cos_2+sinsqrt3_2)*mod_dq[0] - ( sin_2 + cossqrt3_2)*mod_dq[1];
+    cp = (-cos_2-sinsqrt3_2)*mod_dq[0] + (-sin_2 + cossqrt3_2)*mod_dq[1];
 
     //Transformada inversa de park seq-:
     an =  qn * (-sin_th) +  dn * cos_th;
@@ -214,11 +213,11 @@ void pv_control(void){
     cn = ((- qn - sqrt3 * dn) * (-sin_th) + (sqrt3 * qn -  dn) * cos_th)*0.5f;
 
 
-    m_abc[0] = ap + an;
-    m_abc[1] = bp + bn;
-    m_abc[2] = cp + cn;
+    mod_abc[0] = ap + an;
+    mod_abc[1] = bp + bn;
+    mod_abc[2] = cp + cn;
 
-    pwm.setComps(m_abc);
+    pwm.setComps(mod_abc);
 
     if(pwm.en)
             fan.dutycicle = duty;

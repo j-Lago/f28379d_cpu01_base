@@ -40,6 +40,9 @@ public:
 
     void compare()
     {
+        if (pwm.fault)
+            return;
+
         for (int m = 0; m < errNch; m++) // não unir com o loop de baixo para preencher todos os flas e não apenas o primeiro erro
             err_flags[m] = fabsf(adc.measurs[m]) > limits[m];
 

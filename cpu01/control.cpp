@@ -8,10 +8,10 @@
 #include "control.h"
 
 volatile float fan_duty = 0.6f; //velocidade do fan
-volatile float i_dq_p_ref [2] = {3.0f, 0.0f}; //refs correntes seq+
+volatile float i_dq_p_ref [2] = {2.5f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
-volatile float kn = 4.0f;   // ganho compensação seq-
-volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
+volatile float kn = 4.0f *0;   // ganho compensação seq-
+volatile float w0L = 377.0f * 0.001f * 3.0f *0;  //ganho desacoplamento cruzado
 
 bool en_seqn = false;
 Togi togi_v_al;
@@ -23,6 +23,35 @@ PI pi_i_qp;
 PI pi_i_dn;
 PI pi_i_qn;
 pll_s pll;
+
+
+float v_ab[2];      // [va, vb]
+float v_albe[2];    // [valpha, vbeta]
+float v_albe_p[2];
+float v_albe_n[2];
+float v_dq_p[2];
+float v_dq_n[2];
+
+float i_uv[2];
+float i_albe[2];
+float i_albe_p[2];
+float i_albe_n[2];
+float i_dq_p[2];
+float i_dq_n[2];
+
+float cis[2];   // [cos,  sin]
+float cis_n[2]; // [cos, -sin]
+
+float m_dq_p0 [2] = {0,0};
+float m_dq_n0 [2] = {0,0};
+float m_dq_p[2];
+float m_dq_n[2];
+float m_albe_p[2];
+float m_albe_n[2];
+float m_albe[2];
+float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
+
+float inv_vdc_2 = 0.0f;
 
 void control_setup()
 {
@@ -44,31 +73,7 @@ void control()
 {
     //--Variáveis de controle----------------------------------------------------------------------------------
 
-    float v_ab[2];      // [va, vb]
-    float v_albe[2];    // [valpha, vbeta]
-    float v_albe_p[2];
-    float v_albe_n[2];
-    float v_dq_p[2];
-    float v_dq_n[2];
 
-    float i_uv[2];
-    float i_albe[2];
-    float i_albe_p[2];
-    float i_albe_n[2];
-    float i_dq_p[2];
-    float i_dq_n[2];
-
-    float cis[2];   // [cos,  sin]
-    float cis_n[2]; // [cos, -sin]
-
-    float m_dq_p0 [2] = {0,0};
-    float m_dq_n0 [2] = {0,0};
-    float m_dq_p[2];
-    float m_dq_n[2];
-    float m_albe_p[2];
-    float m_albe_n[2];
-    float m_albe[2];
-    float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
 
 
     //--Variáveis de entrada-----------------------------------------------------------------------------------
@@ -102,51 +107,59 @@ void control()
         i_dq_n_ref[1] = -kn * v_dq_n[0];
     }
     else{
-        i_dq_n_ref[0] = 0.0f;
-        i_dq_n_ref[1] = 0.0f;
+        //i_dq_n_ref[0] = 0.0f;
+        //i_dq_n_ref[1] = 0.0f;
     }
 
-    if(pwm.en){
-        // malha corrente seq+
-        transform_ab_albe(i_albe, i_uv);
-        togi_step(&togi_i_al, pll.wf, i_albe[0]);
-        togi_step(&togi_i_be, pll.wf, i_albe[1]);
-        transform_albe_neg(i_albe_n, togi_i_al.out, togi_i_be.out);
+    inv_vdc_2 = 0.0f;
+        if(adc.vdc != 0 )
+            inv_vdc_2 = -2.0f / adc.vdc;
 
-        i_albe_p[0] = i_albe[0] - i_albe_n[0];
-        i_albe_p[1] = i_albe[1] - i_albe_n[1];
-        transform_albe_dq(i_dq_p, cis, i_albe_p);
+    // malha corrente seq+
+    transform_ab_albe(i_albe, i_uv);
+    togi_step(&togi_i_al, pll.wf, i_albe[0]);
+    togi_step(&togi_i_be, pll.wf, i_albe[1]);
+    transform_albe_neg(i_albe_n, togi_i_al.out, togi_i_be.out);
+
+    i_albe_p[0] = i_albe[0] - i_albe_n[0];
+    i_albe_p[1] = i_albe[1] - i_albe_n[1];
+    transform_albe_dq(i_dq_p, cis, i_albe_p);
+
+    //malha corrente seq-
+    transform_albe_dq(i_dq_n, cis_n, i_albe_n);
+
+    if(pwm.en){
+
         pi_step(&pi_i_dp, i_dq_p_ref[0] - i_dq_p[0]);
         pi_step(&pi_i_qp, i_dq_p_ref[1] - i_dq_p[1]);
-        m_dq_p[0] = pi_i_dp.out + m_dq_p0[0] - w0L * i_dq_p[1];
-        m_dq_p[1] = pi_i_qp.out + m_dq_p0[1] + w0L * i_dq_p[0];
-        transform_dq_albe(m_albe_p, cis, m_dq_p);
 
-        //malha corrente seq-
-        transform_albe_dq(i_dq_n, cis_n, i_albe_n);
         pi_step(&pi_i_dn, i_dq_n_ref[0] - i_dq_n[0]);
         pi_step(&pi_i_qn, i_dq_n_ref[1] - i_dq_n[1]);
-        m_dq_n[0] = pi_i_dn.out + m_dq_n0[0] + w0L * i_dq_n[1];
-        m_dq_n[1] = pi_i_qn.out + m_dq_n0[1] - w0L * i_dq_n[0];
-        transform_dq_albe(m_albe_n, cis_n, m_dq_n);
-
-        m_albe[0] = m_albe_p[0] + m_albe_n[0];
-        m_albe[1] = m_albe_p[1] + m_albe_n[1];
-        transform_albe_abc(m_abc, m_albe);
     }
     else
     {
-        m_dq_p0[0] = v_dq_p[0] + m_dq_n[0];
-        m_dq_p0[1] = v_dq_p[1] + m_dq_n[1];
+        pi_reset(&pi_i_dp);
+        pi_reset(&pi_i_qp);
+
+        pi_reset(&pi_i_dn);
+        pi_reset(&pi_i_qn);
+
+        m_dq_p0[0] = v_dq_p[0] * inv_vdc_2 + m_dq_n[0] * 0;
+        m_dq_p0[1] = v_dq_p[1] * inv_vdc_2 + m_dq_n[1] * 0;
     }
 
-    float inv_vdc_2 = 0.0f;
-    if(adc.vdc != 0 )
-        inv_vdc_2 = 2.0f / adc.vdc;
+    m_dq_p[0] = (pi_i_dp.out + m_dq_p0[0] - w0L * i_dq_p[1] ) * inv_vdc_2;
+    m_dq_p[1] = (pi_i_qp.out + m_dq_p0[1] + w0L * i_dq_p[0] ) * inv_vdc_2;
+    transform_dq_albe(m_albe_p, cis, m_dq_p);
 
-    m_abc[0] *= inv_vdc_2;
-    m_abc[1] *= inv_vdc_2;
-    m_abc[2] *= inv_vdc_2;
+    m_dq_n[0] = (pi_i_dn.out + m_dq_n0[0] + w0L * i_dq_n[1]) * inv_vdc_2;
+    m_dq_n[1] = (pi_i_qn.out + m_dq_n0[1] - w0L * i_dq_n[0]) * inv_vdc_2;
+    transform_dq_albe(m_albe_n, cis_n, m_dq_n);
+
+    m_albe[0] = m_albe_p[0] + m_albe_n[0];
+    m_albe[1] = m_albe_p[1] + m_albe_n[1];
+    transform_albe_abc(m_abc, m_albe);
+
 
     pwm.setComps(m_abc);
 

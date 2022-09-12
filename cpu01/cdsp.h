@@ -105,7 +105,9 @@ struct PI
 };
 
 void pi_set(struct PI* self, float fa, float kp, float Ti, float in0, float out0);
+void pi_reset(struct PI* self, float in0=0.0f, float out0=0.0f);
 void pi_step(struct PI* self, float input);
+
 
 /*
  * Togi: third order generalized integrator

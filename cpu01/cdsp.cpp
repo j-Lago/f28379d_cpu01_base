@@ -60,6 +60,12 @@ void pi_set(struct PI* self, float fa, float kp, float Ti, float in0, float out0
     self->out = out0;
 }
 
+void pi_reset(struct PI* self, float in0, float out0)
+{
+    self->in = in0;
+    self->out = out0;
+}
+
 void pi_step(struct PI* self, float input)
 {
     self->out = self->k0 * input + self->k1 * self->in + self->out;
