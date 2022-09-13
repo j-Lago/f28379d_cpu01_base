@@ -148,12 +148,12 @@ void control()
         m_dq_p0[1] = v_dq_p[1] * inv_vdc_2 + m_dq_n[1] * 0;
     }
 
-    m_dq_p[0] = (pi_i_dp.out + m_dq_p0[0] - w0L * i_dq_p[1] ) * inv_vdc_2;
-    m_dq_p[1] = (pi_i_qp.out + m_dq_p0[1] + w0L * i_dq_p[0] ) * inv_vdc_2;
+    m_dq_p[0] = (pi_i_dp.out - w0L * i_dq_p[1] ) * inv_vdc_2 + m_dq_p0[0];
+    m_dq_p[1] = (pi_i_qp.out + w0L * i_dq_p[0] ) * inv_vdc_2 + m_dq_p0[1];
     transform_dq_albe(m_albe_p, cis, m_dq_p);
 
-    m_dq_n[0] = (pi_i_dn.out + m_dq_n0[0] + w0L * i_dq_n[1]) * inv_vdc_2;
-    m_dq_n[1] = (pi_i_qn.out + m_dq_n0[1] - w0L * i_dq_n[0]) * inv_vdc_2;
+    m_dq_n[0] = (pi_i_dn.out + w0L * i_dq_n[1]) * inv_vdc_2 + m_dq_n0[0];
+    m_dq_n[1] = (pi_i_qn.out - w0L * i_dq_n[0]) * inv_vdc_2 + m_dq_n0[1];
     transform_dq_albe(m_albe_n, cis_n, m_dq_n);
 
     m_albe[0] = m_albe_p[0] + m_albe_n[0];
