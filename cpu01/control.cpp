@@ -10,10 +10,11 @@
 volatile float fan_duty = 0.6f; //velocidade do fan
 volatile float i_dq_p_ref [2] = {2.5f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
-volatile float kn = 4.0f *0;   // ganho compensação seq-
-volatile float w0L = 377.0f * 0.001f * 3.0f *0;  //ganho desacoplamento cruzado
+volatile float kn = 0.01f;   // ganho compensação seq-
+volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
 
 bool en_seqn = false;
+bool auto_seqn = true;
 Togi togi_v_al;
 Togi togi_v_be;
 Togi togi_i_al;
@@ -24,32 +25,6 @@ PI pi_i_dn;
 PI pi_i_qn;
 pll_s pll;
 
-
-float v_ab[2];      // [va, vb]
-float v_albe[2];    // [valpha, vbeta]
-float v_albe_p[2];
-float v_albe_n[2];
-float v_dq_p[2];
-float v_dq_n[2];
-
-float i_uv[2];
-float i_albe[2];
-float i_albe_p[2];
-float i_albe_n[2];
-float i_dq_p[2];
-float i_dq_n[2];
-
-float cis[2];   // [cos,  sin]
-float cis_n[2]; // [cos, -sin]
-
-float m_dq_p0 [2] = {0,0};
-float m_dq_n0 [2] = {0,0};
-float m_dq_p[2];
-float m_dq_n[2];
-float m_albe_p[2];
-float m_albe_n[2];
-float m_albe[2];
-float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
 
 float inv_vdc_2 = 0.0f;
 
@@ -72,7 +47,31 @@ void control_setup()
 void control()
 {
     //--Variáveis de controle----------------------------------------------------------------------------------
+    float v_ab[2];      // [va, vb]
+    float v_albe[2];    // [valpha, vbeta]
+    float v_albe_p[2];
+    float v_albe_n[2];
+    float v_dq_p[2];
+    float v_dq_n[2];
 
+    float i_uv[2];
+    float i_albe[2];
+    float i_albe_p[2];
+    float i_albe_n[2];
+    float i_dq_p[2];
+    float i_dq_n[2];
+
+    float cis[2];   // [cos,  sin]
+    float cis_n[2]; // [cos, -sin]
+
+    float m_dq_p0 [2] = {0,0};
+    float m_dq_n0 [2] = {0,0};
+    float m_dq_p[2];
+    float m_dq_n[2];
+    float m_albe_p[2];
+    float m_albe_n[2];
+    float m_albe[2];
+    float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
 
 
 
@@ -102,13 +101,16 @@ void control()
 
     // tensao de sequência negativa e referência de corrente seq-
     transform_albe_dq(v_dq_n, cis_n, v_albe_n);
-    if(en_seqn){
-        i_dq_n_ref[0] = kn * v_dq_n[1];
-        i_dq_n_ref[1] = -kn * v_dq_n[0];
-    }
-    else{
-        //i_dq_n_ref[0] = 0.0f;
-        //i_dq_n_ref[1] = 0.0f;
+
+    if(auto_seqn){
+        if(en_seqn){
+            i_dq_n_ref[0] = kn * v_dq_n[1];
+            i_dq_n_ref[1] = -kn * v_dq_n[0];
+        }
+        else{
+            i_dq_n_ref[0] = 0.0f;
+            i_dq_n_ref[1] = 0.0f;
+        }
     }
 
     inv_vdc_2 = 0.0f;
