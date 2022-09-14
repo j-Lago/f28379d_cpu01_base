@@ -7,10 +7,12 @@
 
 #include "control.h"
 
-volatile float fan_duty = 0.6f; //velocidade do fan
-volatile float i_dq_p_ref [2] = {2.5f, 0.0f}; //refs correntes seq+
+volatile float fan_duty = 0.6f; //velocidade do fan quando inv está ligado
+volatile float fan_idle = 0.2; //velocidade do fan quando inv está desligado
+
+volatile float i_dq_p_ref [2] = {4.0f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
-volatile float kn = 0.01f;   // ganho compensação seq-
+volatile float kn = 0.04f;   // ganho compensação seq-
 volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
 
 bool en_seqn = false;
@@ -38,8 +40,8 @@ void control_setup()
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
     pi_set(&pi_i_dp, fa, 8.1649f, 0.0072f,  0.0f, 0.0f);
     pi_set(&pi_i_qp, fa, 8.1649f, 0.0072f,  0.0f, 0.0f);
-    pi_set(&pi_i_dn, fa, 4.0f, 0.05f,  0.0f, 0.0f);
-    pi_set(&pi_i_qn, fa, 4.0f, 0.05f,  0.0f, 0.0f);
+    pi_set(&pi_i_dn, fa, 4.000f, 0.0500f,  0.0f, 0.0f);
+    pi_set(&pi_i_qn, fa, 4.000f, 0.0500f,  0.0f, 0.0f);
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
 
 }
@@ -47,6 +49,9 @@ void control_setup()
 void control()
 {
     //--Variáveis de controle----------------------------------------------------------------------------------
+    static float m_dq_p0 [2] = {0,0};
+    float m_dq_n0 [2] = {0,0};
+
     float v_ab[2];      // [va, vb]
     float v_albe[2];    // [valpha, vbeta]
     float v_albe_p[2];
@@ -64,8 +69,7 @@ void control()
     float cis[2];   // [cos,  sin]
     float cis_n[2]; // [cos, -sin]
 
-    float m_dq_p0 [2] = {0,0};
-    float m_dq_n0 [2] = {0,0};
+
     float m_dq_p[2];
     float m_dq_n[2];
     float m_albe_p[2];
@@ -105,7 +109,7 @@ void control()
     if(auto_seqn){
         if(en_seqn){
             i_dq_n_ref[0] = kn * v_dq_n[1];
-            i_dq_n_ref[1] = -kn * v_dq_n[0];
+            i_dq_n_ref[1] = kn * v_dq_n[0];
         }
         else{
             i_dq_n_ref[0] = 0.0f;
@@ -146,8 +150,8 @@ void control()
         pi_reset(&pi_i_dn);
         pi_reset(&pi_i_qn);
 
-        m_dq_p0[0] = v_dq_p[0] * inv_vdc_2 + m_dq_n[0] * 0;
-        m_dq_p0[1] = v_dq_p[1] * inv_vdc_2 + m_dq_n[1] * 0;
+        m_dq_p0[0] = v_dq_p[0] * inv_vdc_2; // + m_dq_n[0];
+        m_dq_p0[1] = v_dq_p[1] * inv_vdc_2; // + m_dq_n[1];
     }
 
     m_dq_p[0] = (pi_i_dp.out - w0L * i_dq_p[1] ) * inv_vdc_2 + m_dq_p0[0];
@@ -170,7 +174,7 @@ void control()
     if(pwm.en)
         fan.dutycicle = fan_duty;
     else
-        fan.dutycicle = 0.0f;
+        fan.dutycicle = fan_idle;
 
 
 }
