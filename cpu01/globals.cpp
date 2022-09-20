@@ -20,11 +20,11 @@ OutPin led_az(31, active_low);
 softPWM fan(65, 20000, 500);
 
 #ifdef ENABLE_PROBES
-OutPin probe_pins[] = {32, 19, 18, 67}; // pinos RELE1..4 na placa de controle
+OutPin probe_pins[] = {32, 19, 18, 67, 111}; // pinos RELE1..4 na placa de controle
 #endif
 
-NextionP0 page0;
-//rPiComm::Comm raspi;
+//NextionP0 page0;
+rPiComm::Comm raspi;
 
 ADC& adc = ADC::getInstance();
 PWM& pwm = PWM::getInstance();

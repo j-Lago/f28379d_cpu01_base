@@ -157,6 +157,12 @@ void rPiComm::Comm::unsafe_write_uint32(uint32_t* u32, char length4, char addres
 
 
 
+void rPiComm::Comm::unsafe_write_raw(char* bytes, char length4) const
+{
+    for(char k=0; k<length4; k++)
+        send(bytes[k]);
+}
+
 void rPiComm::Comm::unsafe_write_int32(int32_t* i32, char length4, char address8) const
 {
     char func = 'w';

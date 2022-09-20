@@ -238,6 +238,7 @@ namespace rPiComm
         void unsafe_write_int16  ( int16_t* i16, char length4, char address8) const;
         void unsafe_write_uint32 (uint32_t* u32, char length4, char address8) const;
         void unsafe_write_int32  ( int32_t* i32, char length4, char address8) const;
+        void unsafe_write_raw    (char* bytes, char length4) const;
 
         inline void push(char c) const;
         inline void push(const char *str) const;

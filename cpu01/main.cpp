@@ -15,15 +15,28 @@
 #include "control.h"
 
 
+
+
 void hardware_setup();
 
 void main(void)
 {
     hardware_setup();
-    page0.par.loadDefaults();
+    //page0.par.loadDefaults();
 
     while(true){
-        page0.refresh();
+        //page0.refresh();
+
+
+        if(raspi.ser.len() > 0)
+        {
+PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
+        raspi.ser.dump();
+PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
+        }
+
+
+
     }
 }
 

@@ -27,6 +27,8 @@ PI pi_i_dn;
 PI pi_i_qn;
 pll_s pll;
 
+float cis[2];   // [cos,  sin]
+
 
 float inv_vdc_2 = 0.0f;
 
@@ -66,7 +68,6 @@ void control()
     float i_dq_p[2];
     float i_dq_n[2];
 
-    float cis[2];   // [cos,  sin]
     float cis_n[2]; // [cos, -sin]
 
 

@@ -100,7 +100,12 @@ void SCI::push(char c)
         fifo_tx.push(c);
 }
 
-void SCI::dump()
+int SCI::len()
+{
+    return fifo_tx.len;
+}
+
+int SCI::dump()
 {
     /*
      while (fifo_tx.len > 0){
@@ -108,12 +113,14 @@ void SCI::dump()
         ScicRegs.SCITXBUF.all = fifo_tx.pop();
     }
     */
+    int dump_count = fifo_tx.len;
     while(fifo_tx.len > 0){
         while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
             ; // aguarda esvaziar buffer de envio até 16 bytes
         for (int k = 0; k < 16 && fifo_tx.len > 0; k++)
             ScicRegs.SCITXBUF.all = fifo_tx.pop();
     }
+    return dump_count;
 }
 
 void SCI::unsafe_dump()

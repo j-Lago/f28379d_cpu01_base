@@ -7,6 +7,19 @@
 #include "f_controle.h"
 #include "control.h"
 
+extern float cis[2];
+
+#define PLOT_POINTS 256
+int plot_count = 0;
+float plot_chA[PLOT_POINTS];
+float plot_chB[PLOT_POINTS];
+float* chA = &cis[0];
+float* chB = &cis[1];
+
+
+// for debugging
+float32 send_f[3] = {0.0f, 3.1415956f , -999999999.9f};
+
 
 /*
  * Interrupção de final de conversão do ADC
@@ -14,7 +27,7 @@
 interrupt void main_adc_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
-    //static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
+    static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
 
 PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 
@@ -40,6 +53,7 @@ PROBE_SET(1);   // probe: 1 - medicao de tempo controle
     //pv_control(); //controle original
     control(); //nova implementação reorganizada e com desacoplamento
 PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
+
 
     /*
     //
@@ -77,12 +91,32 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
     }
     */
 
+
+
+    if(++comm_downsampling_count >= COMM_REFRESH_COMP)
+    {
+        comm_downsampling_count = 0;
+
+PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
+        send_f[0] += .01;
+        raspi.write_float32(send_f, 3, 0x10, false);
+PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
+    }
+
+
+    //plot
+    plot_chA[plot_count] = *chA;
+    plot_chB[plot_count] = *chB;
+    if(++plot_count >= PLOT_POINTS)
+        plot_count = 0;
+
     fan.refresh();
 
-    if(refresh_count++ >= REFRESH_COMP){
-        led_az.toggle();
+    if(++refresh_count >= REFRESH_COMP){
         refresh_count = 0;
-        page0.periodic_refresh();
+
+        led_az.toggle();
+        //page0.periodic_refresh();
     }
 
 
