@@ -7,14 +7,19 @@
 #include "f_controle.h"
 #include "control.h"
 
-extern float cis[2];
+extern float m_abc[3];
+extern pll_s pll;
 
 #define PLOT_POINTS 256
+
+int plot_downsample_count = -1;
+int plot_downsample_factor = 4;
+
 int plot_count = 0;
 float plot_chA[PLOT_POINTS];
 float plot_chB[PLOT_POINTS];
-float* chA = &cis[0];
-float* chB = &cis[1];
+float* chA = &m_abc[0];
+float* chB = &pll.th;
 
 
 // for debugging
@@ -103,12 +108,16 @@ PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
 PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
     }
 
-
     //plot
-    plot_chA[plot_count] = *chA;
-    plot_chB[plot_count] = *chB;
-    if(++plot_count >= PLOT_POINTS)
-        plot_count = 0;
+    if (++plot_downsample_count >= plot_downsample_factor)
+    {
+        plot_downsample_count = 0;
+
+        plot_chA[plot_count] = *chA;
+        plot_chB[plot_count] = *chB;
+        if(++plot_count >= PLOT_POINTS)
+            plot_count = 0;
+    }
 
     fan.refresh();
 
