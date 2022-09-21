@@ -6,6 +6,7 @@
 #include "adc.h"
 #include "f_controle.h"
 #include "control.h"
+#include "scope.h"
 
 extern float m_abc[3];
 extern pll_s pll;
@@ -15,11 +16,14 @@ extern pll_s pll;
 int plot_downsample_count = -1;
 int plot_downsample_factor = 4;
 
+bool dump_serial = false;
+bool reset_plot_count = false;
+
+
+
 int plot_count = 0;
 float plot_chA[PLOT_POINTS];
-float plot_chB[PLOT_POINTS];
 float* chA = &m_abc[0];
-float* chB = &pll.th;
 
 
 // for debugging
@@ -97,7 +101,7 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
     */
 
 
-
+/*
     if(++comm_downsampling_count >= COMM_REFRESH_COMP)
     {
         comm_downsampling_count = 0;
@@ -107,15 +111,26 @@ PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
         raspi.write_float32(send_f, 3, 0x10, false);
 PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
     }
+*/
 
     //plot
     if (++plot_downsample_count >= plot_downsample_factor)
     {
         plot_downsample_count = 0;
 
-        plot_chA[plot_count] = *chA;
-        plot_chB[plot_count] = *chB;
-        if(++plot_count >= PLOT_POINTS)
+        if(plot_count < PLOT_POINTS)
+        {
+            plot_chA[plot_count] = *chA;
+            plot_count++;
+
+            if(scope.state == buffering)
+            {
+                PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
+                scope.sample();
+                PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
+            }
+
+        }else
             plot_count = 0;
     }
 

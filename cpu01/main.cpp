@@ -13,9 +13,10 @@
 #include "cla.h"
 #include "parameters.h"
 #include "control.h"
+#include "scope.h"
 
-
-
+extern Scope scope;
+ScopeState test;
 
 void hardware_setup();
 
@@ -27,11 +28,11 @@ void main(void)
     while(true){
         //page0.refresh();
 
-
-        if(raspi.ser.len() > 0)
+        test = scope.state ;
+        if(scope.state == full)//(raspi.ser.len() > 0)
         {
 PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
-        raspi.ser.dump();
+            scope.send();
 PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
         }
 

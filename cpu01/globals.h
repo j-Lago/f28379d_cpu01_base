@@ -16,6 +16,8 @@
 #include "settings.h"
 #include "softPWM.h"
 #include "raspberrypi.h"
+#include "scope.h"
+
 
 
 
@@ -53,3 +55,5 @@ extern PWM& pwm;
 extern Encoder& enc;
 
 extern Protecao prot;
+
+extern Scope scope;

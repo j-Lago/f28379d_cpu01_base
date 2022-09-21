@@ -32,3 +32,5 @@ Encoder& enc = Encoder::getInstance();
 
 Protecao prot(adc, pwm);
 
+Scope scope(&raspi, 0x10, &adc.vrs, &adc.vts, 16);
+
