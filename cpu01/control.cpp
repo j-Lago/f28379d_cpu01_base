@@ -12,7 +12,7 @@ volatile float fan_idle = 0.2; //velocidade do fan quando inv está desligado
 
 volatile float i_dq_p_ref [2] = {5.0f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
-volatile float kn = 0.5f;   // ganho compensação seq-
+volatile float kn = 1.5f;   // ganho compensação seq-
 volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
 
 bool en_seqn = false;
@@ -53,12 +53,12 @@ float i_dq_n[2];
 
 
 
-    float m_dq_p[2];
-    float m_dq_n[2];
-    float m_albe_p[2];
-    float m_albe_n[2];
-    float m_albe[2];
-    float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
+float m_dq_p[2];
+float m_dq_n[2];
+float m_albe_p[2];
+float m_albe_n[2];
+float m_albe[2];
+float m_abc[3];     // [ma, mb, mc] (para modulador PWM)
 
 
 float inv_vdc_2 = 0.0f;
@@ -71,8 +71,8 @@ void control_setup()
     togi_set(&togi_v_be, fa, 1.4f, 0.2f);
     togi_set(&togi_i_al, fa, 1.4f, 0.2f);
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
-    pi_set(&pi_i_dp, fa, 4.1649f, 0.0072f,  0.0f, 0.0f);
-    pi_set(&pi_i_qp, fa, 4.1649f, 0.0072f,  0.0f, 0.0f);
+    pi_set(&pi_i_dp, fa, 2.1649f, 0.0072f,  0.0f, 0.0f);
+    pi_set(&pi_i_qp, fa, 2.1649f, 0.0072f,  0.0f, 0.0f);
     pi_set(&pi_i_dn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
     pi_set(&pi_i_qn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
@@ -122,7 +122,7 @@ void control()
     if(auto_seqn){
         if(en_seqn){
             i_dq_n_ref[0] = kn * (v_dq_n[1] - v_dq_n_base[1]);
-            i_dq_n_ref[1] = kn * (v_dq_n[0] - v_dq_n_base[0]);
+            i_dq_n_ref[1] = -kn * (v_dq_n[0] - v_dq_n_base[0]);
         }
         else{
             i_dq_n_ref[0] = 0.0f;

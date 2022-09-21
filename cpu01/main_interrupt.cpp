@@ -23,7 +23,7 @@ bool reset_plot_count = false;
 
 int plot_count = 0;
 float plot_chA[PLOT_POINTS];
-float* chA = &m_abc[0];
+float* chA = &pll.th;
 
 
 // for debugging
