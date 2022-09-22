@@ -15,8 +15,7 @@
 #include "control.h"
 #include "scope.h"
 
-extern Scope scope;
-ScopeState test;
+extern Scope<SCOPE_BUFER_SIZE> scope;
 
 void hardware_setup();
 
@@ -28,12 +27,11 @@ void main(void)
     while(true){
         //page0.refresh();
 
-        test = scope.state ;
         if(scope.state == full)//(raspi.ser.len() > 0)
         {
-PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
+            PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
             scope.send();
-PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
+            PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
         }
 
 

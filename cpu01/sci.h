@@ -53,7 +53,7 @@ class SCI
 {
 public:
     static const uint32_t BAUD_RATE = 512000; //500000;
-    static const uint16_t FIFO_TX_SIZE = 2048; //1024;
+    static const uint16_t FIFO_TX_SIZE = 512;
 
     FIFO<char, FIFO_TX_SIZE> fifo_tx;
 

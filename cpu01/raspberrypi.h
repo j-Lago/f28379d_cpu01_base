@@ -75,43 +75,20 @@
  *   -------------------------------------------------------------------------------------------------------------------------------------------
  *  modo dump(envio de grandes quantidades de dados por pacote):
  *
- *  primeira mensagem solicita que o receptor entre no modo dump (e responda quando estiver pronto para receber os dados)
+ *  envia uma length*ch de dados
  *
- *   bits   |        8        |    4   :   4    |        8        |        8        |        8        |        8        |
+ *   bits   |        8        |    4   :   4    |        8        |        8        |        8        |
  *
- *          |-----------------+-----------------+-----------------+-----------------+-----------------+-----------------|
- *          |       cmd       |   type : len    |      address    |     length0     |      length1    |    checksum     |
- *          |-----------------+-----------------+-----------------+-----------------+-----------------+-----------------|
- *                  'd'        2=bytes : 0              0-255                    0-65536                   (~sum)+1
- *                             5=uint16: 0
- *                             6=int16 : 0
- *                             7=uint32: 0
- *                             8=int32 : 0
- *                             11=float: 0
+ *          |-----------------+-----------------+-----------------+-----------------+-----------------+
+ *          |       cmd       |   type : ch     |     length      |     address     |    checksum     |
+ *          |-----------------+-----------------+-----------------+-----------------+-----------------+
+ *                  'd'        2=bytes : x              0-255            0-255          -(~sum)+1
+ *                             5=uint16: x
+ *                             6=int16 : x
+ *                             7=uint32: x
+ *                             8=int32 : x
+ *                             11=float: x
  *
- *
- *  resposta para solicitação de modo dump (mesmo pacote de solicitação, apenas com alteração de func e checksum):
- *
- *   bits   |        8        |    4   :   4    |        8        |        8        |        8        |        8        |
- *
- *          |-----------------+-----------------+-----------------+-----------------+-----------------+-----------------|
- *          |       cmd       |   type : len    |      address    |     length0     |      length1    |    checksum     |
- *          |-----------------+-----------------+-----------------+-----------------+-----------------+-----------------|
- *                  'k'        2=bytes : 0              0-255                    4-65533                   (~sum)+1
- *                             5=uint16: 0
- *                             6=int16 : 0
- *                             7=uint32: 0
- *                             8=int32 : 0
- *                             11=float: 0
- *
- *  dados enviados no modo dump (exemplo para float):
- *
- *   bits   |        8        |        8        |        8        |        8        |        8        | ... |        8        |        8        |        8        |
- *
- *          |-----------------|-----------------+-----------------+-----------------+-----------------+-----------------+     +-----------------|-----------------|
- *          |       cmd       |    data[0].b0   |    data[0].b1   |    data[0].b2   |    data[0].b3   |    data[1].b0   | ... |    data[L].4    |    checksum     |
- *          |-----------------|-----------------+-----------------+-----------------+-----------------+-----------------+     +-----------------|-----------------|
- *                  's'
  */
 
 namespace rPiComm
@@ -228,6 +205,7 @@ namespace rPiComm
         void write_int16  ( int16_t* i16, char length4, char address8, bool buff_dump=true) const;
         void write_uint32 (uint32_t* u32, char length4, char address8, bool buff_dump=true) const;
         void write_int32  ( int32_t* i32, char length4, char address8, bool buff_dump=true) const;
+        void write_raw    (char* bytes, int length) const;
 
         /*
          * os métodos com prefixo unsafe_ escrevem diretametne no buffer de hardware sem verificação se esse

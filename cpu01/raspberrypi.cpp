@@ -203,6 +203,19 @@ void rPiComm::Comm::unsafe_write_int32(int32_t* i32, char length4, char address8
 
 
 // safe: usa buffer e dump
+
+void rPiComm::Comm::write_raw(char* bytes, int length) const
+{
+    for(char k=0; k<length; k++)
+    {
+        if(ser.fifo_tx.len >= ser.FIFO_TX_SIZE)
+            dump();
+        push(bytes[k]);
+    }
+
+    dump();
+}
+
 void rPiComm::Comm::write_float32(float32* f32, char length4, char address8, bool dump_buff) const
 {
     rPiComm::UniType f;

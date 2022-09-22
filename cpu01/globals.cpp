@@ -32,5 +32,6 @@ Encoder& enc = Encoder::getInstance();
 
 Protecao prot(adc, pwm);
 
-Scope scope(&raspi, 0x10, &adc.vrs, &adc.vts, 16);
+extern pll_s pll;
+Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &pll.th, &adc.vrs, &adc.vts);
 

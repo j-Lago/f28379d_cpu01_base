@@ -17,7 +17,7 @@
 #include "softPWM.h"
 #include "raspberrypi.h"
 #include "scope.h"
-
+#include "control.h"
 
 
 
@@ -35,7 +35,7 @@
 #define REFRESH_COMP 5000 // 20k/5k = 4 Hz (frequencia de atualização da hmi nextion e led)
 #define COMM_REFRESH_COMP 1000   // comunicação a 20k/1000 = 20Hz
 
-
+#define SCOPE_BUFER_SIZE 170
 
 
 extern OutPin led_vm;
@@ -56,4 +56,4 @@ extern Encoder& enc;
 
 extern Protecao prot;
 
-extern Scope scope;
+extern Scope<SCOPE_BUFER_SIZE> scope;

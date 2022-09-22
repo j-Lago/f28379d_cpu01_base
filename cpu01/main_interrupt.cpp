@@ -4,7 +4,6 @@
 #include "pwm.h"
 #include "cla.h"
 #include "adc.h"
-#include "f_controle.h"
 #include "control.h"
 #include "scope.h"
 
@@ -36,7 +35,7 @@ float32 send_f[3] = {0.0f, 3.1415956f , -999999999.9f};
 interrupt void main_adc_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
-    static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
+    //static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
 
 PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 

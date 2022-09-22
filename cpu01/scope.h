@@ -12,26 +12,28 @@
 
 typedef enum { empty, buffering, full, sending } ScopeState;
 
-
+template<size_t buffer_size>
 class Scope
 {
 public:
     int address;
-    int buffer_size;
     volatile ScopeState state;
     rPiComm::Comm* hmi;
 
+    float buffer[3][buffer_size];
+
     float *chA_ptr;
     float *chB_ptr;
+    float *chC_ptr;
 
     int count = 0;
 
-    Scope(rPiComm::Comm *hmi, int address, float *chA_ptr, float *chB_ptr, int buffer_size=1024)
+    Scope(rPiComm::Comm *hmi, int address, float *chA_ptr, float *chB_ptr, float *chC_ptr)
     : hmi(hmi),
-      buffer_size(buffer_size),
       address(address),
       chA_ptr(chA_ptr),
       chB_ptr(chB_ptr),
+      chC_ptr(chC_ptr),
       state(empty)
     {}
 
@@ -41,8 +43,11 @@ public:
         {
             if(count < buffer_size)
             {
-                float ch[2] = {*chA_ptr, *chB_ptr};
-                hmi->write_float32(ch, 2, address, false);
+                //float ch[3] = {*chA_ptr, *chB_ptr, *chC_ptr};
+                //hmi->write_float32(ch, 2, address, false);
+                buffer[0][count] = *chA_ptr;
+                buffer[1][count] = *chB_ptr;
+                buffer[2][count] = *chC_ptr;
                 count++;
             }else{
                 state = full;
@@ -52,7 +57,16 @@ public:
 
     void send()
     {
-        hmi->ser.dump();
+        //for(int k=0; k<count; k++){
+        //    hmi->write_float32(buffer[k], 3, address, true);
+        //}
+        char preamb[] = {'d', 0xB3, buffer_size, 0x10};
+        hmi->write_raw(preamb, 4);
+
+        hmi->write_raw((char*)buffer, 3*buffer_size*4);
+
+        hmi->write_raw(preamb, 1);
+
         count = 0;
         state = empty;
     }
