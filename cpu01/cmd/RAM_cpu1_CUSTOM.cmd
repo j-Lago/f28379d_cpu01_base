@@ -15,10 +15,10 @@ MEMORY
 	//-- RAM CPU1 / CLA --------------------------------------------------------------------------------------
    	CLAtoCPU  	: origin = 0x001480,   	length = 0x000080	// msg
    	CPUtoCLA  	: origin = 0x001500,   	length = 0x000080   // msg
- 	LS0_1      	: origin = 0x008000,   	length = 0x001000
+ 	LS0_2      	: origin = 0x008000,   	length = 0x001800
 //	LS0        	: origin = 0x008000,   	length = 0x000800
 //	LS1        	: origin = 0x008800,   	length = 0x000800
-   	LS2    		: origin = 0x009000,   	length = 0x000800
+// 	LS2    		: origin = 0x009000,   	length = 0x000800
    	LS3    		: origin = 0x009800,   	length = 0x000800
    	LS4_5       : origin = 0x00A000,   	length = 0x001000
    	//--------------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ SECTIONS
    	codestart        : >  BEGIN
    	.reset           : >  RESET TYPE = DSECT	// not used
    	.cinit           : >  M0					// expected to be in FLASH/ROM
-   	.econst          : >  LS2					// expected to be in FLASH/ROM
+   	.econst          : >  GS4_7					// expected to be in FLASH/ROM
    	.switch          : >  M0					// depends on the --unified_memory option setting
    	.text            : >> D0 |
                           D1 |
@@ -80,7 +80,7 @@ SECTIONS
    	//--------------------------------------------------------------------------------------------------------
 
    	//-- Uninitialized ---------------------------------------------------------------------------------------
-   	.ebss            : >  LS0_1		// must be in RAM
+   	.ebss            : >  LS0_2		// must be in RAM
    	.stack           : >  M1  		// must be in low 64K RAM (stack pointer is a 16 bit register)
    	.esysmem         : >  LS3		// must be in RAM
    	//--------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ SECTIONS
     //-- CLA specific sections -------------------------------------------------------------------------------
 // 	.bss_cla		: >  LS1		// must be in RAM within addresses 0x008000 through 0x00AFFF
 //  .const_cla	    : >  LS1		// must be in RAM within addresses 0x008000 through 0x00AFFF
-    .scratchpad     : >  LS0_1 		// must be in RAM within addresses 0x008000 through 0x00AFFF
+    .scratchpad     : >  LS0_2 		// must be in RAM within addresses 0x008000 through 0x00AFFF
    	Cla1Prog        : >  LS4_5		// must be in RAM within addresses 0x008000 through 0x00AFFF
    	Cla1ToCpuMsgRAM : >  CLAtoCPU   // must be in RAM within addresses 0x001480 through 0x0014FF
    	CpuToCla1MsgRAM : >  CPUtoCLA	// must be in RAM within addresses 0x001500 through 0x00157F

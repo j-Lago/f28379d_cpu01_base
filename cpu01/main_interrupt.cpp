@@ -9,24 +9,27 @@
 
 extern float m_abc[3];
 extern pll_s pll;
+extern float teste0;
+extern float teste1;
+extern float teste2;
+extern float teste3;
+extern float teste4;
+extern float teste5;
 
-#define PLOT_POINTS 256
+
 
 int plot_downsample_count = -1;
-int plot_downsample_factor = 4;
+int plot_downsample_factor = 0;
 
 bool dump_serial = false;
 bool reset_plot_count = false;
 
 
+//#define PLOT_POINTS 256
+//int plot_count = 0;
+//float plot_chA[PLOT_POINTS];
+//float* chA = &pll.th;
 
-int plot_count = 0;
-float plot_chA[PLOT_POINTS];
-float* chA = &pll.th;
-
-
-// for debugging
-float32 send_f[3] = {0.0f, 3.1415956f , -999999999.9f};
 
 
 /*
@@ -35,7 +38,6 @@ float32 send_f[3] = {0.0f, 3.1415956f , -999999999.9f};
 interrupt void main_adc_isr(void)
 {
     static uint32_t refresh_count = REFRESH_COMP;
-    //static uint16_t comm_downsampling_count = COMM_REFRESH_COMP;
 
 PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 
@@ -44,7 +46,6 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
         pwm.enable();
     else if(!pwm.fault)
         prot.clear();
-
 
 
     //enc.update_vel(); // altualiza em frequencia fs/enc.downsample
@@ -83,54 +84,30 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
     }
     //pwm.setComps(cla_abc);
     */
-    /*
-    if(++comm_downsampling_count >= COMM_REFRESH_COMP){
-        comm_downsampling_count = 0;
-
-        switch(teste_count)
-        {
-                case 0: raspi.unsafe_write_float32(fteste, 3, 45);
-        break;  case 1: raspi.unsafe_write_uint16(u16teste, 6, 80);
-        break;  case 2: raspi.unsafe_write_int16(i16teste, 6, 105);
-        break;  case 3: raspi.unsafe_write_uint32(u32teste, 3, 80);
-        break;  case 4: raspi.unsafe_write_int32(i32teste, 3, 85);
-        }
-        teste_count = (++teste_count) % 5;
-    }
-    */
 
 
-/*
-    if(++comm_downsampling_count >= COMM_REFRESH_COMP)
-    {
-        comm_downsampling_count = 0;
+    // for test
+    teste0 += 377.0f/20000.0f * teste1;
+    if (teste0 >= 2*3.1415926535897932384626433832795)
+        teste0 -= 2*3.1415926535897932384626433832795f;
 
-PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
-        send_f[0] += .01;
-        raspi.write_float32(send_f, 3, 0x10, false);
-PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
-    }
-*/
+    teste3 = teste2*cos(teste0);
+    teste4 = teste2*sin(teste0);
+    teste5 = teste0 * 0.15915494309189533576888376337251f;
+
 
     //plot
     if (++plot_downsample_count >= plot_downsample_factor)
     {
         plot_downsample_count = 0;
 
-        if(plot_count < PLOT_POINTS)
+        bool sampled = scope.sample();
+
+        if (sampled)
         {
-            plot_chA[plot_count] = *chA;
-            plot_count++;
-
-            if(scope.state == buffering)
-            {
-                PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
-                scope.sample();
-                PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
-            }
-
-        }else
-            plot_count = 0;
+            PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
+            PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
+        }
     }
 
     fan.refresh();
@@ -140,6 +117,13 @@ PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
 
         led_az.toggle();
         //page0.periodic_refresh();
+        if(scope.state == empty){
+            scope.state = buffering;
+            if (teste2 < 0.4f)
+                teste2=1.0f;
+            else
+                teste2 *= .95f;
+        }
     }
 
 

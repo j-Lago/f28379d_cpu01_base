@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include <stdint.h>
 #include "globals.h"
 #include "raspberrypi.h"
 
 typedef enum { empty, buffering, full, sending } ScopeState;
+
 
 template<size_t buffer_size>
 class Scope
@@ -20,7 +22,11 @@ public:
     volatile ScopeState state;
     rPiComm::Comm* hmi;
 
-    float buffer[3][buffer_size];
+    union{
+        float data_f[3][buffer_size];
+        uint16_t  data_u[3*2*buffer_size];
+    };
+
 
     float *chA_ptr;
     float *chB_ptr;
@@ -37,22 +43,25 @@ public:
       state(empty)
     {}
 
-    void sample()
+    bool sample()
     {
-        if(state == buffering)
+        if(state != buffering)
+            return false;
+
+
+        if(count < buffer_size)
         {
-            if(count < buffer_size)
-            {
-                //float ch[3] = {*chA_ptr, *chB_ptr, *chC_ptr};
-                //hmi->write_float32(ch, 2, address, false);
-                buffer[0][count] = *chA_ptr;
-                buffer[1][count] = *chB_ptr;
-                buffer[2][count] = *chC_ptr;
-                count++;
-            }else{
-                state = full;
-            }
+            data_f[0][count] = *chA_ptr;
+            data_f[1][count] = *chB_ptr;
+            data_f[2][count] = *chC_ptr;
+            count++;
         }
+        else
+        {
+            state = full;
+        }
+
+        return true;
     }
 
     void send()
@@ -63,7 +72,7 @@ public:
         char preamb[] = {'d', 0xB3, buffer_size, 0x10};
         hmi->write_raw(preamb, 4);
 
-        hmi->write_raw((char*)buffer, 3*buffer_size*4);
+        hmi->write_uint16_raw(data_u, 3*buffer_size*2);
 
         hmi->write_raw(preamb, 1);
 

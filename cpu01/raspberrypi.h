@@ -206,6 +206,7 @@ namespace rPiComm
         void write_uint32 (uint32_t* u32, char length4, char address8, bool buff_dump=true) const;
         void write_int32  ( int32_t* i32, char length4, char address8, bool buff_dump=true) const;
         void write_raw    (char* bytes, int length) const;
+        void write_uint16_raw    (uint16_t* uints, int length) const;
 
         /*
          * os métodos com prefixo unsafe_ escrevem diretametne no buffer de hardware sem verificação se esse

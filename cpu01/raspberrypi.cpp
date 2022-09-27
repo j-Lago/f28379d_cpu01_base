@@ -216,6 +216,22 @@ void rPiComm::Comm::write_raw(char* bytes, int length) const
     dump();
 }
 
+void rPiComm::Comm::write_uint16_raw(uint16_t* uints, int length) const
+{
+    for(char k=0; k<length; k++)
+    {
+        if(ser.fifo_tx.len >= (ser.FIFO_TX_SIZE-1))
+            dump();
+
+
+        push(uints[k] & 0x00ff);
+        push(uints[k] >> 8);
+
+    }
+
+    dump();
+}
+
 void rPiComm::Comm::write_float32(float32* f32, char length4, char address8, bool dump_buff) const
 {
     rPiComm::UniType f;
