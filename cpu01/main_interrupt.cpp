@@ -96,19 +96,13 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
     teste5 = teste0 * 0.15915494309189533576888376337251f;
 
 
-    //plot
-    if (++scope.downsample_count >= scope.downsample_factor)
+    //hmi scope sample
+    if (scope.sample())
     {
-        scope.downsample_count = 0;
-
-        bool sampled = scope.sample();
-
-        if (sampled)
-        {
-            PROBE_SET(4);   // probe: 4 - medicao de tempo comunicação
-            PROBE_CLEAR(4); // probe: 4 - medicao de tempo comunicação
-        }
+        PROBE_SET(4);   // probe: 4 - indicação de amostragem scope
+        PROBE_CLEAR(4); // probe: 4 - indicação de amostragem scope
     }
+
 
     fan.refresh();
 
