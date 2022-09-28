@@ -22,6 +22,9 @@ public:
     volatile ScopeState state;
     rPiComm::Comm* hmi;
 
+    int downsample_factor = 1;
+    int downsample_count = -1;
+
     union{
         float data_f[3][buffer_size];
         uint16_t  data_u[3*2*buffer_size];
@@ -69,12 +72,20 @@ public:
         //for(int k=0; k<count; k++){
         //    hmi->write_float32(buffer[k], 3, address, true);
         //}
-        char preamb[] = {'d', 0xB3, buffer_size, 0x10};
-        hmi->write_raw(preamb, 4);
+
+
+        char preamb[] = {'d', 0xB3, buffer_size>>8, buffer_size & 0xff, 0x10};
+        hmi->write_raw(preamb, 5);
+
+        //char preamb[] = {'d', 0xB3, buffer_size & 0xff, 0x10};
+        //hmi->write_raw(preamb, 4);
 
         hmi->write_uint16_raw(data_u, 3*buffer_size*2);
 
         hmi->write_raw(preamb, 1);
+
+        char tmp[2] = {downsample_factor, 0};
+        hmi->write_byte(tmp, 1, 0x0c);
 
         count = 0;
         state = empty;

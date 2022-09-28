@@ -18,8 +18,8 @@ extern float teste5;
 
 
 
-int plot_downsample_count = -1;
-int plot_downsample_factor = 0;
+//int plot_downsample_count = -1;
+//int plot_downsample_factor = 0;
 
 bool dump_serial = false;
 bool reset_plot_count = false;
@@ -97,9 +97,9 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
 
     //plot
-    if (++plot_downsample_count >= plot_downsample_factor)
+    if (++scope.downsample_count >= scope.downsample_factor)
     {
-        plot_downsample_count = 0;
+        scope.downsample_count = 0;
 
         bool sampled = scope.sample();
 

@@ -309,6 +309,34 @@ void rPiComm::Comm::write_uint16(uint16_t* u16, char length4, char address8, boo
 
 
 
+void rPiComm::Comm::write_byte(char* u16, char length4, char address8, bool dump_buff) const
+{
+    char func = 'w';
+    char type_len = ((char)(2<<4)) | (length4 & 0x00ff);
+    char checksum;
+    char data;
+
+    push(func);
+    push(type_len);
+    push(address8);
+
+    checksum = func + type_len + address8;
+
+    for(uint_fast8_t k=0; k<length4; k++)
+    {
+        data = u16[k] & 0x00ff;
+        push(data);
+        checksum += data;
+    }
+
+    push((~checksum)+1);
+
+    if (dump_buff)
+        dump();
+}
+
+
+
 void rPiComm::Comm::write_int16(int16_t* i16, char length4, char address8, bool dump_buff ) const
 {
     char func = 'w';

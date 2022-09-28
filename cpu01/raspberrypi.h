@@ -200,6 +200,7 @@ namespace rPiComm
         static SCI& ser;   // pointer to SCI (UART) object
 
     public:
+        void write_byte   ( char* c, char length4, char address8, bool buff_dump=true) const;
         void write_float32( float32* f32, char length4, char address8, bool buff_dump=true) const;
         void write_uint16 (uint16_t* u16, char length4, char address8, bool buff_dump=true) const;
         void write_int16  ( int16_t* i16, char length4, char address8, bool buff_dump=true) const;

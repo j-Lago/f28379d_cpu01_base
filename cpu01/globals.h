@@ -35,7 +35,7 @@
 #define REFRESH_COMP 8000 // 20k/5k = 4 Hz (frequencia de atualização da hmi nextion e led)
 #define COMM_REFRESH_COMP 1000   // comunicação a 20k/1000 = 20Hz
 
-#define SCOPE_BUFER_SIZE 250
+#define SCOPE_BUFER_SIZE 333
 
 
 extern OutPin led_vm;
