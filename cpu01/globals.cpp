@@ -33,11 +33,18 @@ Encoder& enc = Encoder::getInstance();
 Protecao prot(adc, pwm);
 
 extern pll_s pll;
+extern float i_albe[2];
+extern float v_albe[2];
+extern float i_dq_p[2];
+extern float i_dq_n[2];
 float teste0 = 0.0f;
 float teste1 = 4.0f;
 float teste2 = 0.9f;
 float teste3 = 0.9f;
 float teste4 = 0.9f;
 float teste5 = 0.9f;
-Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &teste3, &teste4, &teste5);
+
+
+//Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &teste3, &teste4, &teste5);
+Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &i_dq_p[0], &i_dq_n[0], &pll.th);
 

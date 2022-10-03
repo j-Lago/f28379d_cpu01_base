@@ -71,8 +71,8 @@ void control_setup()
     togi_set(&togi_v_be, fa, 1.4f, 0.2f);
     togi_set(&togi_i_al, fa, 1.4f, 0.2f);
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
-    pi_set(&pi_i_dp, fa, 2.1649f, 0.0072f,  0.0f, 0.0f);
-    pi_set(&pi_i_qp, fa, 2.1649f, 0.0072f,  0.0f, 0.0f);
+    pi_set(&pi_i_dp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
+    pi_set(&pi_i_qp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
     pi_set(&pi_i_dn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
     pi_set(&pi_i_qn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
