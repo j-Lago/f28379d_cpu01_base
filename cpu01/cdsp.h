@@ -152,3 +152,44 @@ void pll_set(struct pll_s* self, float fa, float w0, float kp, float Ti);
 void pll_step(struct pll_s* self, float input);
 
 
+
+
+/*
+ * Controlador 3 ordem
+ *
+ *    Função transferência em s:
+ *
+ *      y          (1 + s*z0) * (1 + s*z1) * (1 + s*z2)
+ *      -  = k * -------------------------------------------
+ *      x          (1 + s*p0) * (1 + s*p1) * (1 + s*p2)
+ *
+ *
+ *    Função transferência em z (tustin):
+ *
+ *      y      n0 * z^3 + n1 * z^2 + n2 * z + n3
+ *      -  =  -------------------------------------------
+ *      x      d0 * z^3 + d1 * z^2 + d2 * z + d3
+ *
+ *
+ */
+struct TFZ4
+{
+    float n0;
+    float n1;
+    float n2;
+    float n3;
+    float d1;
+    float d2;
+    float d3;
+        float in1;
+        float in2;
+        float in3;
+    float out1;
+    float out2;
+    float out3;
+        float out;
+};
+void tfz4_set(struct TFZ4* self, float* num, float* den);
+void tfz4_reset(struct TFZ4* self);
+void tfz4_step(struct TFZ4* self, float input);
+

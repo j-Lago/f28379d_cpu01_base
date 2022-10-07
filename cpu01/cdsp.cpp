@@ -258,3 +258,57 @@ void pll_step(struct pll_s* self, float input)
    self->th = self->int_th.out;
 }
 //---------------------------------------------------------------------------------------------------------
+
+
+
+
+
+void tfz4_set(struct TFZ4* self, float* num, float* den)
+{
+    float temp = 1.0f / den[0];
+    self->n0 = num[0]*temp;
+    self->n1 = num[1]*temp;
+    self->n2 = num[2]*temp;
+    self->n3 = num[3]*temp;
+    self->d1 = den[1]*temp;
+    self->d2 = den[2]*temp;
+    self->d3 = den[3]*temp;
+    self->in1 = 0.0f;
+    self->in2 = 0.0f;
+    self->in3 = 0.0f;
+    self->out = 0.0f;
+    self->out1 = 0.0f;
+    self->out2 = 0.0f;
+    self->out3 = 0.0f;
+}
+
+
+void tfz4_reset(struct TFZ4* self)
+{
+    self->in1 = 0.0f;
+    self->in2 = 0.0f;
+    self->in3 = 0.0f;
+    self->out = 0.0f;
+    self->out1 = 0.0f;
+    self->out2 = 0.0f;
+    self->out3 = 0.0f;
+}
+
+void tfz4_step(struct TFZ4* self, float input)
+{
+    self->out3 = self->out2;
+    self->out2 = self->out1;
+    self->out1 = self->out;
+
+        self->out =         self->n0 * input
+                + self->n1 * self->in1
+                + self->n2 * self->in2
+                + self->n3 * self->in3
+                 - self->out1 * self->d1
+                 - self->out2 * self->d2
+                 - self->out3 * self->d3;
+
+    self->in3 = self->in2;
+    self->in2 = self->in1;
+    self->in1 = input;
+}

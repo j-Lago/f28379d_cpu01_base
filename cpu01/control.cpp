@@ -21,10 +21,19 @@ Togi togi_v_al;
 Togi togi_v_be;
 Togi togi_i_al;
 Togi togi_i_be;
-PI pi_i_dp;
-PI pi_i_qp;
-PI pi_i_dn;
-PI pi_i_qn;
+
+
+//PI ctrl_i_dp;
+//PI ctrl_i_qp;
+PI ctrl_i_dn;
+PI ctrl_i_qn;
+
+
+TFZ4 ctrl_i_dp;
+TFZ4 ctrl_i_qp;
+//TFZ4 ctrl_i_dn;
+//TFZ4 ctrl_i_qn;
+
 pll_s pll;
 
 float cis_n[2]; // [cos, -sin]
@@ -71,10 +80,18 @@ void control_setup()
     togi_set(&togi_v_be, fa, 1.4f, 0.2f);
     togi_set(&togi_i_al, fa, 1.4f, 0.2f);
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
-    pi_set(&pi_i_dp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
-    pi_set(&pi_i_qp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
-    pi_set(&pi_i_dn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
-    pi_set(&pi_i_qn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
+
+    float num[] = {8.187984650220797, -24.009191120806744,  23.561156310802478,  -7.738971607927825};
+    float den[] = {1.000000000000000,  -2.977932230428358,   2.968581480609866,  -0.990649250181508};
+    tfz4_set(&ctrl_i_dp, num, den);
+    tfz4_set(&ctrl_i_qp, num, den);
+    //tfz4_set(&ctrl_i_dn, num, den);
+    //tfz4_set(&ctrl_i_qn, num, den);
+
+    //pi_set(&ctrl_i_dp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
+    //pi_set(&pi_i_qp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
+    pi_set(&ctrl_i_dn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
+    pi_set(&ctrl_i_qn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
 
 }
@@ -150,18 +167,26 @@ void control()
 
     if(pwm.en){
 
-        pi_step(&pi_i_dp, i_dq_p_ref[0] - i_dq_p[0]);
-        pi_step(&pi_i_qp, i_dq_p_ref[1] - i_dq_p[1]);
+        //pi_step(&ctrl_i_dp, i_dq_p_ref[0] - i_dq_p[0]);
+        //pi_step(&ctrl_i_qp, i_dq_p_ref[1] - i_dq_p[1]);
+        pi_step(&ctrl_i_dn, i_dq_n_ref[0] - i_dq_n[0]);
+        pi_step(&ctrl_i_qn, i_dq_n_ref[1] - i_dq_n[1]);
 
-        pi_step(&pi_i_dn, i_dq_n_ref[0] - i_dq_n[0]);
-        pi_step(&pi_i_qn, i_dq_n_ref[1] - i_dq_n[1]);
+        tfz4_step(&ctrl_i_dp, i_dq_p_ref[0] - i_dq_p[0]);
+        tfz4_step(&ctrl_i_qp, i_dq_p_ref[1] - i_dq_p[1]);
+        //tfz4_step(&ctrl_i_dn, i_dq_n_ref[0] - i_dq_n[0]);
+        //tfz4_step(&ctrl_i_qn, i_dq_n_ref[1] - i_dq_n[1]);
     }
     else{
-        pi_reset(&pi_i_dp);
-        pi_reset(&pi_i_qp);
+        //pi_reset(&ctrl_i_dp);
+        //pi_reset(&ctrl_i_qp);
+        pi_reset(&ctrl_i_dn);
+        pi_reset(&ctrl_i_qn);
 
-        pi_reset(&pi_i_dn);
-        pi_reset(&pi_i_qn);
+        tfz4_reset(&ctrl_i_dp);
+        tfz4_reset(&ctrl_i_qp);
+        //tfz4_reset(&ctrl_i_dn);
+        //tfz4_reset(&ctrl_i_qn);
 
         m_dq_p0[0] = v_dq_p[0] * inv_vdc_2; // + m_dq_n[0];
         m_dq_p0[1] = v_dq_p[1] * inv_vdc_2; // + m_dq_n[1];
@@ -169,12 +194,12 @@ void control()
 
 
 
-    m_dq_p[0] = (pi_i_dp.out - w0L * i_dq_p[1] ) * inv_vdc_2 + m_dq_p0[0];
-    m_dq_p[1] = (pi_i_qp.out + w0L * i_dq_p[0] ) * inv_vdc_2 + m_dq_p0[1];
+    m_dq_p[0] = (ctrl_i_dp.out - w0L * i_dq_p[1] ) * inv_vdc_2 + m_dq_p0[0];
+    m_dq_p[1] = (ctrl_i_qp.out + w0L * i_dq_p[0] ) * inv_vdc_2 + m_dq_p0[1];
     transform_dq_albe(m_albe_p, cis, m_dq_p);
 
-    m_dq_n[0] = (pi_i_dn.out + w0L * i_dq_n[1]) * inv_vdc_2 + m_dq_n0[0];
-    m_dq_n[1] = (pi_i_qn.out - w0L * i_dq_n[0]) * inv_vdc_2 + m_dq_n0[1];
+    m_dq_n[0] = (ctrl_i_dn.out + w0L * i_dq_n[1]) * inv_vdc_2 + m_dq_n0[0];
+    m_dq_n[1] = (ctrl_i_qn.out - w0L * i_dq_n[0]) * inv_vdc_2 + m_dq_n0[1];
     transform_dq_albe(m_albe_n, cis_n, m_dq_n);
 
     m_albe[0] = m_albe_p[0] + m_albe_n[0];
