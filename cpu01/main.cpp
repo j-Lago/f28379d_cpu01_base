@@ -16,6 +16,7 @@
 #include "scope.h"
 
 extern Scope<SCOPE_BUFER_SIZE> scope;
+extern float kn;
 
 void hardware_setup();
 
@@ -30,7 +31,10 @@ void main(void)
         if(scope.state == full)//(raspi.ser.len() > 0)
         {
             PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
+
+            scope.hmi->write_float32(&kn, 1, 4, 0);
             scope.send();
+
             PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
         }
 

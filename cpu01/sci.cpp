@@ -11,6 +11,8 @@
 #include "sci.h"
 #include "globals.h"
 
+extern bool en_seqn;
+extern float kn;
 
 void SCI::setup(void)
 {
@@ -159,6 +161,26 @@ interrupt void sciaRxFifoIsr(void)
         else
             if(last_char != 0xff)
                 //page0.decodeMessage(s16_rx);
+                if(s16_rx[0] == 'r') // reset
+                    pwm.fault = false;
+                else if (s16_rx[0] == 'e') // enable
+                {
+                    if(s16_rx[1] == '1')
+                        pwm.en = true;
+                    else
+                        pwm.en = false;
+                }
+                else if (s16_rx[0] == 'n') // seq-
+                {
+                    if(s16_rx[1] == '1')
+                        en_seqn = true;
+                    else
+                        en_seqn = false;
+                }
+                else if (s16_rx[0] == 'k') // seq-
+                {
+                    kn = .02f * s16_rx[1];
+                }
 
         last_char = c;
     }
