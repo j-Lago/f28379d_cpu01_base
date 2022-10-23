@@ -17,6 +17,8 @@
 
 extern Scope<SCOPE_BUFER_SIZE> scope;
 extern float kn;
+extern PWM& pwm;
+extern bool en_seqn;
 
 void hardware_setup();
 
@@ -32,7 +34,9 @@ void main(void)
         {
             PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
 
-            scope.hmi->write_float32(&kn, 1, 4, 0);
+            scope.hmi->write_float32(&kn, 1, 0x04, 0);
+            char state[3] = {pwm.en, pwm.fault, en_seqn};
+            scope.hmi->write_byte(state, 3, 0x01, 0);
             scope.send();
 
             PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
