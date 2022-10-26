@@ -13,7 +13,7 @@ volatile float fan_idle = 0.2; //velocidade do fan quando inv está desligado
 volatile float i_dq_p_ref [2] = {5.0f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
 volatile float kn = 1.5f;   // ganho compensação seq-
-volatile float w0L = 377.0f * 0.001f * 3.0f;  //ganho desacoplamento cruzado
+volatile float w0L = 377.0f * 0.001f * 3.0f*0;  //ganho desacoplamento cruzado
 
 bool en_seqn = false;
 bool auto_seqn = true;
@@ -34,7 +34,11 @@ TFZ4 ctrl_i_qp;
 TFZ4 ctrl_i_dn;
 TFZ4 ctrl_i_qn;
 
+TFZ3 notch_vdn;
+TFZ3 notch_vqn;
+
 pll_s pll;
+//pll_f pll;
 
 float cis_n[2]; // [cos, -sin]
 float cis[2];   // [cos,  sin]
@@ -85,6 +89,10 @@ void control_setup()
     float den_p[] = {1.000000000000000,  -2.977932230428358,   2.968581480609866,  -0.990649250181508};
     float num_n[] = {1.986091485476268,  -5.937414685749104,   5.927828567364501,  -1.976493868280211};
     float den_n[] = {1.000000000000000,  -2.975603872995130,   2.956957151717522,  -0.981353278722392};
+    float num_6[] = {0.990692704,-1.96875384,0.990692704};
+    float den_6[] = {1,-1.96875384,0.981385407};
+    float num_pll[] = {0.995310128,-1.99026665,0.995310128};
+    float den_pll[] = {1,-1.99026665,0.990620256};
 
 
     tfz4_set(&ctrl_i_dp, num_p, den_p);
@@ -92,11 +100,11 @@ void control_setup()
     tfz4_set(&ctrl_i_dn, num_n, den_n);
     tfz4_set(&ctrl_i_qn, num_n, den_n);
 
-    //pi_set(&ctrl_i_dp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
-    //pi_set(&pi_i_qp, fa, 8.1649f, 0.0052f,  0.0f, 0.0f);
-    //pi_set(&ctrl_i_dn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
-    //pi_set(&ctrl_i_qn, fa, 2.000f, 0.0500f,  0.0f, 0.0f);
+    tfz3_set(&notch_vdn, num_6, den_6);
+    tfz3_set(&notch_vqn, num_6, den_6);
+
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
+    //pllf_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f, num_pll, den_pll );
 
 }
 
@@ -126,6 +134,8 @@ void control()
     transform_albe_dq(v_dq_p, cis, v_albe_p);
 
     pll_step(&pll, v_dq_p[1]);
+    //pllf_step(&pll, v_dq_p[1]);
+
     cis[0] = cos(pll.th);
     cis[1] = sin(pll.th);
     cis_n[0] = cis[0];
@@ -142,12 +152,18 @@ void control()
 
     if(auto_seqn){
         if(en_seqn){
-            i_dq_n_ref[0] = kn * (v_dq_n[1] - v_dq_n_base[1]);
-            i_dq_n_ref[1] = -kn * (v_dq_n[0] - v_dq_n_base[0]);
+            tfz3_step(&notch_vdn,  kn * (v_dq_n[1] - v_dq_n_base[1]));
+            tfz3_step(&notch_vqn, -kn * (v_dq_n[0] - v_dq_n_base[0]));
+            i_dq_n_ref[0] = notch_vdn.out;
+            i_dq_n_ref[1] = notch_vqn.out;
+            //i_dq_n_ref[0] =  kn * (v_dq_n[1] - v_dq_n_base[1]);
+            //i_dq_n_ref[1] = -kn * (v_dq_n[0] - v_dq_n_base[0]);
         }
         else{
             i_dq_n_ref[0] = 0.0f;
             i_dq_n_ref[1] = 0.0f;
+            tfz3_reset(&notch_vdn);
+            tfz3_reset(&notch_vqn);
         }
     }
 

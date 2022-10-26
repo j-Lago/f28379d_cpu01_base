@@ -231,7 +231,7 @@ void ADC::setup()
     // configura disparo SOC
     EALLOW;
     EPwm1Regs.ETSEL.bit.SOCAEN = 0;    // Disable SOC on A group
-    EPwm1Regs.ETSEL.bit.SOCASEL = ET_CTR_PRD; //3;   // Select SOC on Zero e PRD
+    EPwm1Regs.ETSEL.bit.SOCASEL = ET_CTR_PRD; // | ET_CTR_ZERO; //3;   // Select SOC on Zero e PRD
     EPwm1Regs.ETPS.bit.SOCAPRD = 1;    // Generate pulse on 1st event
     EDIS;
 

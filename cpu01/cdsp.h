@@ -153,7 +153,6 @@ void pll_step(struct pll_s* self, float input);
 
 
 
-
 /*
  * Controlador 3 ordem
  *
@@ -192,4 +191,59 @@ struct TFZ4
 void tfz4_set(struct TFZ4* self, float* num, float* den);
 void tfz4_reset(struct TFZ4* self);
 void tfz4_step(struct TFZ4* self, float input);
+
+
+
+/*
+ * Controlador 2 ordem
+ *
+ *    Função transferência em s:
+ *
+ *      y          (1 + s*z0) * (1 + s*z1)
+ *      -  = k * ----------------------------
+ *      x          (1 + s*p0) * (1 + s*p1)
+ *
+ *
+ *    Função transferência em z (tustin):
+ *
+ *      y      n0 * z^2 + n1 * z + n2
+ *      -  =  -------------------------------------------
+ *      x      d0 * z^2 + d1 * z + d2
+ *
+ *
+ */
+struct TFZ3
+{
+    float n0;
+    float n1;
+    float n2;
+    float d1;
+    float d2;
+        float in1;
+        float in2;
+    float out1;
+    float out2;
+        float out;
+};
+void tfz3_set(struct TFZ3* self, float* num, float* den);
+void tfz3_reset(struct TFZ3* self);
+void tfz3_step(struct TFZ3* self, float input);
+
+
+
+/*
+ * PLL: dq + filtro notch (6x fundamental)
+ */
+struct pll_f
+{
+    float kp;
+    float ki;
+    TFZ3 notch;
+    Integrator int_w;
+    Integrator int_th;
+    float wf;
+    float th;
+};
+void pllf_set(struct pll_f* self, float fa, float w0, float kp, float Ti, float* num, float* den);
+void pllf_step(struct pll_f* self, float input);
 

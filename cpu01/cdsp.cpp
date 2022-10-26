@@ -257,6 +257,36 @@ void pll_step(struct pll_s* self, float input)
 
    self->th = self->int_th.out;
 }
+
+void pllf_set(struct pll_f* self, float fa, float w0, float kp, float Ti, float* num, float* den)
+{
+    tfz3_set(&self->notch, num, den);
+    self->kp = kp;
+    self->ki = 1.0/Ti;
+
+    integrator_set(&self->int_w, fa, 0.0f, w0);
+    integrator_set(&self->int_th, fa, 0.0f, 0.0f);
+
+    self->wf = self->int_w.out;
+    self->th = 0.0f;
+}
+
+void pllf_step(struct pll_f* self, float input)
+{
+    tfz3_step(&self->notch, input);
+    float kpin = self->notch.out * self->kp;
+    integrator_step(&self->int_w, kpin * self->ki);
+    self->wf = self->int_w.out;
+    integrator_step(&self->int_th, self->wf + kpin);
+
+    if (self->int_th.out >= f_2pi)
+        self->int_th.out -= f_2pi;
+
+    if (self->int_th.out < 0)
+        self->int_th.out += f_2pi;
+
+   self->th = self->int_th.out;
+}
 //---------------------------------------------------------------------------------------------------------
 
 
@@ -312,3 +342,54 @@ void tfz4_step(struct TFZ4* self, float input)
     self->in2 = self->in1;
     self->in1 = input;
 }
+
+
+
+void tfz3_set(struct TFZ3* self, float* num, float* den)
+{
+    float temp = 1.0f / den[0];
+    self->n0 = num[0]*temp;
+    self->n1 = num[1]*temp;
+    self->n2 = num[2]*temp;
+
+    self->d1 = den[1]*temp;
+    self->d2 = den[2]*temp;
+
+    self->in1 = 0.0f;
+    self->in2 = 0.0f;
+
+    self->out = 0.0f;
+    self->out1 = 0.0f;
+    self->out2 = 0.0f;
+
+}
+
+
+void tfz3_reset(struct TFZ3* self)
+{
+
+    self->in1 = 0.0f;
+    self->in2 = 0.0f;
+
+    self->out = 0.0f;
+    self->out1 = 0.0f;
+    self->out2 = 0.0f;
+
+}
+
+void tfz3_step(struct TFZ3* self, float input)
+{
+
+    self->out2 = self->out1;
+    self->out1 = self->out;
+
+        self->out =         self->n0 * input
+                + self->n1 * self->in1
+                + self->n2 * self->in2
+                 - self->out1 * self->d1
+                 - self->out2 * self->d2;
+
+    self->in2 = self->in1;
+    self->in1 = input;
+}
+
