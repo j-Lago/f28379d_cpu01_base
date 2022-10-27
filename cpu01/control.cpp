@@ -10,7 +10,7 @@
 volatile float fan_duty = 0.6f; //velocidade do fan quando inv está ligado
 volatile float fan_idle = 0.2; //velocidade do fan quando inv está desligado
 
-volatile float i_dq_p_ref [2] = {5.0f, 0.0f}; //refs correntes seq+
+volatile float i_dq_p_ref [2] = {7.0f, 0.0f}; //refs correntes seq+
 volatile float i_dq_n_ref [2] = {0.0f, 0.0f}; //refs correntes seq-
 volatile float kn = 1.5f;   // ganho compensação seq-
 volatile float w0L = 377.0f * 0.001f * 3.0f*0;  //ganho desacoplamento cruzado
@@ -34,8 +34,8 @@ TFZ4 ctrl_i_qp;
 TFZ4 ctrl_i_dn;
 TFZ4 ctrl_i_qn;
 
-TFZ3 notch_vdn;
-TFZ3 notch_vqn;
+TFZ5 notch_vdn;
+TFZ5 notch_vqn;
 
 pll_s pll;
 //pll_f pll;
@@ -85,14 +85,12 @@ void control_setup()
     togi_set(&togi_i_al, fa, 1.4f, 0.2f);
     togi_set(&togi_i_be, fa, 1.4f, 0.2f);
 
-    float num_p[] = {8.187984650220797, -24.009191120806744,  23.561156310802478,  -7.738971607927825};
-    float den_p[] = {1.000000000000000,  -2.977932230428358,   2.968581480609866,  -0.990649250181508};
-    float num_n[] = {1.986091485476268,  -5.937414685749104,   5.927828567364501,  -1.976493868280211};
-    float den_n[] = {1.000000000000000,  -2.975603872995130,   2.956957151717522,  -0.981353278722392};
-    float num_6[] = {0.990692704,-1.96875384,0.990692704};
-    float den_6[] = {1,-1.96875384,0.981385407};
-    float num_pll[] = {0.995310128,-1.99026665,0.995310128};
-    float den_pll[] = {1,-1.99026665,0.990620256};
+    const float num_p[] = {8.0883725,-23.9831351,23.8050353,-7.90929123};
+    const float den_p[] = {1,-2.98692774,2.98661463,-0.999686892};
+    const float num_n[] = {1.98242227,-5.93381841,5.93165143,-1.98024394};
+    const float den_n[] = {1,-2.9756811,2.95703401,-0.981352917};
+    const float num_6[] = {0.995024406,-3.97092525,5.95180483,-3.97092525,0.995024406};
+    const float den_6[] = {1,-3.98084111,5.95179242,-3.9610094,0.990061221};
 
 
     tfz4_set(&ctrl_i_dp, num_p, den_p);
@@ -100,8 +98,8 @@ void control_setup()
     tfz4_set(&ctrl_i_dn, num_n, den_n);
     tfz4_set(&ctrl_i_qn, num_n, den_n);
 
-    tfz3_set(&notch_vdn, num_6, den_6);
-    tfz3_set(&notch_vqn, num_6, den_6);
+    tfz5_set(&notch_vdn, num_6, den_6);
+    tfz5_set(&notch_vqn, num_6, den_6);
 
     pll_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f );
     //pllf_set(&pll, fa, 377.0f, 0.40824829046386301636621401245098f, 0.03f, num_pll, den_pll );
@@ -152,8 +150,8 @@ void control()
 
     if(auto_seqn){
         if(en_seqn){
-            tfz3_step(&notch_vdn,  kn * (v_dq_n[1] - v_dq_n_base[1]));
-            tfz3_step(&notch_vqn, -kn * (v_dq_n[0] - v_dq_n_base[0]));
+            tfz5_step(&notch_vdn,  kn * (v_dq_n[1] - v_dq_n_base[1]));
+            tfz5_step(&notch_vqn, -kn * (v_dq_n[0] - v_dq_n_base[0]));
             i_dq_n_ref[0] = notch_vdn.out;
             i_dq_n_ref[1] = notch_vqn.out;
             //i_dq_n_ref[0] =  kn * (v_dq_n[1] - v_dq_n_base[1]);
@@ -162,8 +160,8 @@ void control()
         else{
             i_dq_n_ref[0] = 0.0f;
             i_dq_n_ref[1] = 0.0f;
-            tfz3_reset(&notch_vdn);
-            tfz3_reset(&notch_vqn);
+            tfz5_reset(&notch_vdn);
+            tfz5_reset(&notch_vqn);
         }
     }
 

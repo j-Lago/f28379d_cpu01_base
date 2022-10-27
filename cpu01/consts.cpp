@@ -41,8 +41,8 @@ const float ADC::gain[] = {0.006171422365f, //iu
                            };
 
 // limite para proteção por software para cada canal de medição ADC
-const float Protecao::limits[] = {8.0f,     //iu
-                                  8.0f,     //iv
+const float Protecao::limits[] = {9.0f,     //iu
+                                  9.0f,     //iv
                                   0.0f,     //ic
                                   0.0f,     //ib
                                   350.0f,   //vrs

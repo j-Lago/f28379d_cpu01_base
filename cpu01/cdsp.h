@@ -188,7 +188,7 @@ struct TFZ4
     float out3;
         float out;
 };
-void tfz4_set(struct TFZ4* self, float* num, float* den);
+void tfz4_set(struct TFZ4* self, const float* num, const float* den);
 void tfz4_reset(struct TFZ4* self);
 void tfz4_step(struct TFZ4* self, float input);
 
@@ -225,10 +225,39 @@ struct TFZ3
     float out2;
         float out;
 };
-void tfz3_set(struct TFZ3* self, float* num, float* den);
+void tfz3_set(struct TFZ3* self, const float* num, const float* den);
 void tfz3_reset(struct TFZ3* self);
 void tfz3_step(struct TFZ3* self, float input);
 
+
+
+struct TFZ5
+{
+    float n0;
+    float n1;
+    float n2;
+    float n3;
+    float n4;
+
+    float d1;
+    float d2;
+    float d3;
+    float d4;
+
+        float in1;
+        float in2;
+        float in3;
+        float in4;
+
+    float out1;
+    float out2;
+    float out3;
+    float out4;
+        float out;
+};
+void tfz5_set(struct TFZ5* self, const float* num, const float* den);
+void tfz5_reset(struct TFZ5* self);
+void tfz5_step(struct TFZ5* self, float input);
 
 
 /*
