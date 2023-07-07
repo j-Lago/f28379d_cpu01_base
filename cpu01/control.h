@@ -13,3 +13,6 @@
 
 void control(void);
 void control_setup(void);
+
+
+void control_open_loop(void); // impoe tensoes senoidais (para debug apenas)

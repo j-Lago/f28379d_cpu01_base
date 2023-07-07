@@ -13,17 +13,37 @@
 #include "cla.h"
 #include "parameters.h"
 #include "control.h"
+#include "scope.h"
 
+extern Scope<SCOPE_BUFER_SIZE> scope;
+extern float kn;
+extern PWM& pwm;
+extern bool en_seqn;
 
 void hardware_setup();
 
 void main(void)
 {
     hardware_setup();
-    page0.par.loadDefaults();
+    //page0.par.loadDefaults();
 
     while(true){
-        page0.refresh();
+        //page0.refresh();
+
+        if(scope.state == full)//(raspi.ser.len() > 0)
+        {
+            PROBE_SET(3);   // probe: 3 - medicao de tempo comunicação
+
+            scope.hmi->write_float32(&kn, 1, 0x04, 0);
+            char state[3] = {pwm.en, pwm.fault, en_seqn};
+            scope.hmi->write_byte(state, 3, 0x01, 0);
+            scope.send();
+
+            PROBE_CLEAR(3); // probe: 3 - medicao de tempo comunicação
+        }
+
+
+
     }
 }
 

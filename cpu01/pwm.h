@@ -41,7 +41,7 @@
 class PWM
 {
 private:
-    static const float fsw = 10000.0f;  // frequencia de comutação 10 kHz
+    static const float fsw = 20000.0f;  // frequencia de comutação 10 kHz
 
     static const uint16_t CMP_TEMPO_MORTO = 38; // CMP_TEMPO_MORTO*40ns: 38 -> 1.52us
     static const uint16_t CMP_PORTADORA = (uint16_t)(CPU_CLOCK / 16 / fsw);   // = 1250 para 10kHz

@@ -11,6 +11,8 @@
 #include "sci.h"
 #include "globals.h"
 
+extern bool en_seqn;
+extern float kn;
 
 void SCI::setup(void)
 {
@@ -100,7 +102,12 @@ void SCI::push(char c)
         fifo_tx.push(c);
 }
 
-void SCI::dump()
+int SCI::len()
+{
+    return fifo_tx.len;
+}
+
+int SCI::dump()
 {
     /*
      while (fifo_tx.len > 0){
@@ -108,12 +115,14 @@ void SCI::dump()
         ScicRegs.SCITXBUF.all = fifo_tx.pop();
     }
     */
+    int dump_count = fifo_tx.len;
     while(fifo_tx.len > 0){
         while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
             ; // aguarda esvaziar buffer de envio até 16 bytes
         for (int k = 0; k < 16 && fifo_tx.len > 0; k++)
             ScicRegs.SCITXBUF.all = fifo_tx.pop();
     }
+    return dump_count;
 }
 
 void SCI::unsafe_dump()
@@ -152,6 +161,26 @@ interrupt void sciaRxFifoIsr(void)
         else
             if(last_char != 0xff)
                 //page0.decodeMessage(s16_rx);
+                if(s16_rx[0] == 'r') // reset
+                    pwm.fault = false;
+                else if (s16_rx[0] == 'e') // enable
+                {
+                    if(s16_rx[1] == '1')
+                        pwm.en = true;
+                    else
+                        pwm.en = false;
+                }
+                else if (s16_rx[0] == 'n') // seq-
+                {
+                    if(s16_rx[1] == '1')
+                        en_seqn = true;
+                    else
+                        en_seqn = false;
+                }
+                else if (s16_rx[0] == 'k') // seq-
+                {
+                    kn = .02f * s16_rx[1];
+                }
 
         last_char = c;
     }

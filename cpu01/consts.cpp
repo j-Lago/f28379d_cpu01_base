@@ -9,7 +9,7 @@
 #include "protecao.h"
 
 // ganhos canais de medição ADC
-const float ADC::offset[]  = {1899.4f, //iu
+const float ADC::offset[]  = {1896.4f, //iu
                               2036.4f, //iv
                               2047.5f, //ic
                               2047.5f, //ib
@@ -41,14 +41,14 @@ const float ADC::gain[] = {0.006171422365f, //iu
                            };
 
 // limite para proteção por software para cada canal de medição ADC
-const float Protecao::limits[] = {7.0f,     //iu
-                                  7.0f,     //iv
+const float Protecao::limits[] = {9.0f,     //iu
+                                  9.0f,     //iv
                                   0.0f,     //ic
                                   0.0f,     //ib
-                                  250.0f,   //vrs
-                                  250.0f,   //vts
-                                  150.0f,    //vp0
-                                  150.0f,    //v0n
+                                  350.0f,   //vrs
+                                  350.0f,   //vts
+                                  350.0f,    //vp0
+                                  350.0f,    //v0n
                                   0.0f,     //vrsf
                                   0.0f,     //vtsf
                                   0.0f,     //icf
