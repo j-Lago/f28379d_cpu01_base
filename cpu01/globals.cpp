@@ -48,3 +48,7 @@ float teste5 = 0.9f;
 Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &teste3, &teste4, &teste5);
 //Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &i_dq_p[0], &i_dq_n[0], &pll.th);
 
+
+// for debug
+float f_debug = 60.0;;
+

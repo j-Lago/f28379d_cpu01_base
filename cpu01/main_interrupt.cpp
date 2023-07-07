@@ -61,8 +61,8 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 
 
 PROBE_SET(1);   // probe: 1 - medicao de tempo controle
-    //pv_control(); //controle original
-    control(); //nova implementação reorganizada e com desacoplamento
+    //control(); //nova implementação reorganizada e com desacoplamento
+    control_open_loop(); //impões tensoes semoidais (apenas para debug)
 PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
 

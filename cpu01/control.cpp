@@ -243,3 +243,37 @@ void control()
 
 
 }
+
+
+
+void control_open_loop()
+{
+    //--Variáveis de controle----------------------------------------------------------------------------------
+
+
+
+    static float th_debug = 0.0;
+
+    th_debug += 3.1415926535897932384626433832795e-4 * f_debug;
+
+    if (th_debug >= f_2pi)
+        th_debug -= f_2pi;
+    if (th_debug <=-f_2pi)
+        th_debug += f_2pi;
+
+    m_albe[0] = cos(th_debug);
+    m_albe[1] = sin(th_debug);
+
+    transform_albe_abc(m_abc, m_albe);
+    pwm.setComps(m_abc);
+
+
+
+    if(pwm.en)
+        fan.dutycicle = fan_duty*.5;
+    else
+        fan.dutycicle = fan_idle;
+
+
+}
+

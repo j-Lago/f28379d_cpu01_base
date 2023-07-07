@@ -59,3 +59,7 @@ extern Protecao prot;
 extern Scope<SCOPE_BUFER_SIZE> scope;
 
 
+// for debug
+extern float f_debug;
+
+
