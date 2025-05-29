@@ -19,6 +19,7 @@ enum ADCresolution {bits12=0, bits16=1};
 enum ADCsignalmode {single=0, differential=1};
 
 
+
 interrupt void main_adc_isr(void);
 interrupt void adca_ppb_isr(void);
 interrupt void adcb_ppb_isr(void);
@@ -28,6 +29,7 @@ class ADC
 {
 
 public:
+
     static const float offset[Nmeasurs];    // definido em consts.cpp
     static const float gain[Nmeasurs];      // definido em consts.cpp
 

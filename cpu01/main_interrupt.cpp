@@ -5,7 +5,7 @@
 #include "cla.h"
 #include "adc.h"
 #include "control.h"
-#include "scope.h"
+//#include "scope.h"
 
 extern float m_abc[3];
 extern pll_s pll;
@@ -44,7 +44,7 @@ interrupt void main_adc_isr(void)
 PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
 
 
-    if(pwm.en) // logica para ligar, desligar e clear pelo debuger
+    if(pwm.is_en()) // logica para ligar, desligar e clear pelo debuger
         pwm.enable();
     else if(!pwm.fault)
         prot.clear();
@@ -53,7 +53,7 @@ PROBE_SET(0); // probe: 0 - medicao de tempo interrupcao adc
     //enc.update_vel(); // altualiza em frequencia fs/enc.downsample
     adc.read(); // aplica ganhos e offsets nas medições
 
-#ifndef DISABLE_PROTECTIONS
+#ifndef DISABLE_SOFT_PROTECTIONS
     prot.compare(); //trip: software
 #endif
 
@@ -99,11 +99,11 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
 
     //hmi scope sample
-    if (scope.sample())
-    {
-        PROBE_SET(4);   // probe: 4 - indicação de amostragem scope
-        PROBE_CLEAR(4); // probe: 4 - indicação de amostragem scope
-    }
+//    if (scope.sample())
+//    {
+//        PROBE_SET(4);   // probe: 4 - indicação de amostragem scope
+//        PROBE_CLEAR(4); // probe: 4 - indicação de amostragem scope
+//    }
 
 
     fan.refresh();
@@ -113,13 +113,13 @@ PROBE_CLEAR(1); // probe: 1 - medicao de tempo controle
 
         led_az.toggle();
         //page0.periodic_refresh();
-        if(scope.state == empty){
-            scope.state = buffering;
-            if (teste2 < 0.4f)
-                teste2=1.0f;
-            else
-                teste2 *= .95f;
-        }
+//        if(scope.state == empty){
+//            scope.state = buffering;
+//            if (teste2 < 0.4f)
+//                teste2=1.0f;
+//            else
+//                teste2 *= .95f;
+//        }
     }
 
 

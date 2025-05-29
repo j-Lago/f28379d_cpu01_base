@@ -6,6 +6,7 @@
  */
 
 #include "adc.h"
+#include "pwm.h"
 #include "globals.h"
 
 /*
@@ -13,8 +14,9 @@
  */
 interrupt void adca_ppb_isr(void)
 {
-#ifndef DISABLE_PROTECTIONS
-    pwm.trip(); //trip: hardware
+#ifndef DISABLE_HARD_PROTECTIONS
+    pwm.trip(1); //trip: hardware
+
 #endif
     adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - adc.offset[0]) * adc.gain[0];
     adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - adc.offset[1]) * adc.gain[1];
@@ -29,8 +31,8 @@ interrupt void adca_ppb_isr(void)
  */
 interrupt void adcb_ppb_isr(void)
 {
-#ifndef DISABLE_PROTECTIONS
-    pwm.trip(); //trip: hardware
+#ifndef DISABLE_HARD_PROTECTIONS
+    pwm.trip(2); //trip: hardware
 #endif
     adc.iu_over =  (AdcaResultRegs.ADCRESULT0 - adc.offset[0]) * adc.gain[0];
     adc.iv_over =  (AdcbResultRegs.ADCRESULT0 - adc.offset[1]) * adc.gain[1];

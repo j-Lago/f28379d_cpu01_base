@@ -24,7 +24,7 @@ OutPin probe_pins[] = {32, 19, 18, 67, 111}; // pinos RELE1..4 na placa de contr
 #endif
 
 //NextionP0 page0;
-rPiComm::Comm raspi;
+//rPiComm::Comm raspi;
 
 ADC& adc = ADC::getInstance();
 PWM& pwm = PWM::getInstance();
@@ -45,7 +45,7 @@ float teste4 = 0.9f;
 float teste5 = 0.9f;
 
 
-Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &teste3, &teste4, &teste5);
+//Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &teste3, &teste4, &teste5);
 //Scope<SCOPE_BUFER_SIZE> scope(&raspi, 0x10, &i_dq_p[0], &i_dq_n[0], &pll.th);
 
 

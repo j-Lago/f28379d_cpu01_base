@@ -28,7 +28,10 @@ void PWM::setComps(float* abc)
 void PWM::update()
 {
     if(fault)
-        trip();
+        if (fault_type == 0)
+            trip(-1);
+        else
+            trip(fault_type);
 
     EPwm2Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * a + BIAS);
     EPwm1Regs.CMPA.bit.CMPA = (uint16_t)(GAIN * b + BIAS);
@@ -56,7 +59,7 @@ bool PWM::enable(void)
 }
 
 
-void PWM::disable(void)
+void PWM::disable(int fault_source)
 {
     EALLOW;
     EPwm1Regs.TZFRC.bit.OST = 1;
@@ -67,18 +70,24 @@ void PWM::disable(void)
     EPwm6Regs.TZFRC.bit.OST = 1;
     EDIS;
     en = false;
+    clear_type = fault_source;
 }
 
-void PWM::trip()
+void PWM::trip(int fault_source)
 {
-    disable();
+    disable(fault_source);
     fault = true;
 }
 
-void PWM::clear()
+void PWM::clear(int clear_source)
 {
-    disable();
+    disable(clear_source);
     fault = false;
+}
+
+bool PWM::is_en(void)
+{
+    return en;
 }
 
 void PWM::setup(void)
@@ -260,7 +269,7 @@ PWM PWM::instance;
 PWM& PWM::getInstance(){ return instance; }
 PWM::PWM()
 {
-    clear();
+    clear(100);
     a = 0;
     b = 0;
     c = 0;

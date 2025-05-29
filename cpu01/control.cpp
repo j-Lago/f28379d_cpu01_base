@@ -190,7 +190,7 @@ void control()
     transform_albe_dq(i_dq_n, cis_n, i_albe_n);
 
 
-    if(pwm.en){
+    if(pwm.is_en()){
 
         //pi_step(&ctrl_i_dp, i_dq_p_ref[0] - i_dq_p[0]);
         //pi_step(&ctrl_i_qp, i_dq_p_ref[1] - i_dq_p[1]);
@@ -236,7 +236,7 @@ void control()
 
 
 
-    if(pwm.en)
+    if(pwm.is_en())
         fan.dutycicle = fan_duty;
     else
         fan.dutycicle = fan_idle;
@@ -252,28 +252,62 @@ void control_open_loop()
 
 
 
-    static float th_debug = 0.0;
+    volatile static float th_debug = 0.0;
+    volatile static float m_debug = 1.0;
+    volatile static float th_step_debug = 0.0;
+    volatile static float rampa_debug = 0.001;
 
-    th_debug += 3.1415926535897932384626433832795e-4 * f_debug;
+    volatile static float th_rampa = 0.0002;
+
+    static float f = 60;
+
+
+
+    if (f > f_debug){
+        f -= rampa_debug;
+        if(f<f_debug)
+            f = f_debug;
+    }else{
+        f += rampa_debug;
+        if(f>f_debug)
+            f = f_debug;
+    }
+
+
+    th_debug += 3.1415926535897932384626433832795e-4 * f;
+
 
     if (th_debug >= f_2pi)
         th_debug -= f_2pi;
     if (th_debug <=-f_2pi)
         th_debug += f_2pi;
 
-    m_albe[0] = cos(th_debug);
-    m_albe[1] = sin(th_debug);
+    if(th_step_debug>0){
+        th_debug += th_rampa;
+        th_step_debug -= th_rampa*90./f_pi;
+        if(th_step_debug<0)
+            th_step_debug = 0.;
+    }
+
+    if(th_step_debug<0){
+            th_debug -= th_rampa;
+            th_step_debug += th_rampa*90./f_pi;
+            if(th_step_debug>0)
+                th_step_debug = 0.;
+        }
+
+    m_albe[0] = m_debug * cos(th_debug);
+    m_albe[1] = m_debug * sin(th_debug);
 
     transform_albe_abc(m_abc, m_albe);
     pwm.setComps(m_abc);
 
 
 
-    if(pwm.en)
+    if(pwm.is_en())
         fan.dutycicle = fan_duty*.5;
     else
         fan.dutycicle = fan_idle;
 
 
 }
-

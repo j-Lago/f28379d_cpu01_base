@@ -35,7 +35,7 @@ public:
             err_flags[k] = false;
             err_values[k] = 0.0f;
         }
-        pwm.clear();
+        pwm.clear(10);
     }
 
     void compare()
@@ -48,7 +48,7 @@ public:
 
         for(int m = 0; m < errNch; m++){
             if(err_flags[m] and !pwm.fault){
-                pwm.trip();
+                pwm.trip(3);
                 for(int n = 0; n < errNch; n++)
                     err_values[n] = adc.measurs[n];
                 break;

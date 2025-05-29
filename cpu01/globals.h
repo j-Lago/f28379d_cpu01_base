@@ -7,7 +7,10 @@
 
 #pragma once
 
-#include "nextion_pages.h"
+//#define DISABLE_HARD_PROTECTIONS
+//#define DISABLE_SOFT_PROTECTIONS
+
+//#include "nextion_pages.h"
 #include "gpio.h"
 #include "adc.h"
 #include "encoder.h"
@@ -15,8 +18,8 @@
 #include "protecao.h"
 #include "settings.h"
 #include "softPWM.h"
-#include "raspberrypi.h"
-#include "scope.h"
+//#include "raspberrypi.h"
+//#include "scope.h"
 #include "control.h"
 
 
@@ -48,7 +51,7 @@ extern OutPin probe_pins[];
 #endif
 
 //extern NextionP0 page0;
-extern rPiComm::Comm raspi;
+//extern rPiComm::Comm raspi;
 
 extern ADC& adc;
 extern PWM& pwm;
@@ -56,7 +59,7 @@ extern Encoder& enc;
 
 extern Protecao prot;
 
-extern Scope<SCOPE_BUFER_SIZE> scope;
+//extern Scope<SCOPE_BUFER_SIZE> scope;
 
 
 // for debug
